@@ -5,7 +5,7 @@ import shellHtml from "../admin/shell.html?raw";
 const COOKIE = "cq_admin";
 
 function getPassword() {
-  return process.env.ADMIN_PASSWORD || "cityqlo2026";
+  return process.env.ADMIN_PASSWORD || "1234";
 }
 
 function token() {
