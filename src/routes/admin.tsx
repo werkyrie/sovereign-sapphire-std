@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash } from "node:crypto";
-// @ts-expect-error - raw import
 import shellHtml from "../admin/shell.html?raw";
 
 const COOKIE = "cq_admin";
