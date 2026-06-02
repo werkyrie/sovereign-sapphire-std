@@ -1,0 +1,2488 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --obsidian:#1A1C1E;--charcoal:#282828;--graphite:#34393D;
+    --pearl:#F3F5F8;--bone:#E8ECF1;--linen:#DBE1E8;
+    --white:#FAFAF9;--silver:#9CA3AF;--ash:#6B7280;--ink-text:#1E293B;
+    --logo-blue:#235A90;--accent-gold:#D4A017;--accent-teal:#14B8A6;
+    --ease-luxury:cubic-bezier(0.16,1,0.3,1);
+  }
+  .shell{display:flex;height:640px;background:var(--pearl);border-radius:12px;overflow:hidden;font-family:'Inter',sans-serif;border:0.5px solid var(--color-border-tertiary);}
+
+  /* SIDEBAR */
+  .sidebar{width:200px;min-width:200px;background:var(--obsidian);display:flex;flex-direction:column;}
+  .sidebar-logo{padding:16px 14px 13px;border-bottom:1px solid var(--graphite);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .logo-mark{width:28px;height:28px;background:var(--logo-blue);border:1px solid var(--accent-gold);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:13px;color:var(--accent-gold);}
+  .logo-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:12px;color:var(--white);letter-spacing:0.12em;text-transform:uppercase;}
+  .logo-sub{font-size:8.5px;letter-spacing:0.18em;color:var(--silver);text-transform:uppercase;opacity:0.55;}
+  .s-nav{flex:1;overflow-y:auto;padding:8px 0;}
+  .s-nav::-webkit-scrollbar{width:0;}
+  .s-lbl{font-size:8.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--silver);opacity:0.4;padding:8px 14px 4px;}
+  .s-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;border-left:2px solid transparent;transition:all 250ms var(--ease-luxury);}
+  .s-item:hover{background:rgba(35,90,144,0.1);}
+  .s-item.active{background:rgba(35,90,144,0.16);border-left-color:var(--accent-gold);}
+  .s-icon{font-size:13px;color:var(--silver);width:15px;text-align:center;flex-shrink:0;transition:color 220ms;}
+  .s-item.active .s-icon,.s-item:hover .s-icon{color:var(--accent-gold);}
+  .s-text{font-size:11px;color:var(--silver);flex:1;transition:color 220ms;}
+  .s-item.active .s-text,.s-item:hover .s-text{color:var(--white);}
+  .s-badge{font-size:8.5px;padding:2px 5px;border-radius:2px;letter-spacing:0.05em;}
+  .bg-gold{background:rgba(212,160,23,0.15);color:var(--accent-gold);border:1px solid rgba(212,160,23,0.28);}
+  .divider{height:1px;background:var(--graphite);margin:5px 14px;opacity:0.38;}
+
+  /* TREE PANE */
+  .tree-pane{width:220px;min-width:220px;background:white;border-right:1px solid var(--linen);display:flex;flex-direction:column;overflow:hidden;}
+  .tree-head{padding:13px 14px 10px;border-bottom:1px solid var(--linen);flex-shrink:0;}
+  .tree-head-title{font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:7px;}
+  .search-wrap{position:relative;}
+  .search-wrap .ti{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--silver);}
+  .sinput{width:100%;padding:6px 8px 6px 26px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;}
+  .sinput:focus{border-color:var(--logo-blue);}
+  .tree-body{flex:1;overflow-y:auto;}
+  .tree-body::-webkit-scrollbar{width:2px;}
+  .tree-body::-webkit-scrollbar-thumb{background:var(--linen);}
+
+  /* Location row */
+  .loc-row{display:flex;align-items:center;gap:7px;padding:9px 14px 7px;cursor:pointer;border-bottom:0.5px solid var(--bone);transition:background 180ms;user-select:none;}
+  .loc-row:hover{background:var(--pearl);}
+  .loc-row.open{background:rgba(35,90,144,0.04);}
+  .loc-chevron{font-size:11px;color:var(--silver);transition:transform 280ms var(--ease-luxury);flex-shrink:0;}
+  .loc-row.open .loc-chevron{transform:rotate(90deg);}
+  .loc-pin{font-size:13px;color:var(--logo-blue);flex-shrink:0;}
+  .loc-name{font-size:12px;font-weight:500;color:var(--ink-text);flex:1;}
+  .loc-count{font-size:9px;color:var(--silver);background:var(--bone);padding:2px 5px;border-radius:2px;}
+
+  /* Project rows (nested) */
+  .proj-group{overflow:hidden;max-height:0;transition:max-height 380ms var(--ease-luxury);}
+  .proj-group.open{max-height:400px;}
+  .proj-row{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 34px;cursor:pointer;border-bottom:0.5px solid var(--bone);border-left:2px solid transparent;transition:all 200ms;}
+  .proj-row:hover{background:var(--pearl);}
+  .proj-row.active{background:rgba(35,90,144,0.07);border-left-color:var(--accent-gold);}
+  .proj-dot{width:5px;height:5px;border-radius:50%;background:var(--linen);flex-shrink:0;transition:background 200ms;}
+  .proj-row.active .proj-dot{background:var(--accent-gold);}
+  .proj-name{font-size:11.5px;color:var(--ash);flex:1;transition:color 200ms;}
+  .proj-row.active .proj-name{color:var(--ink-text);font-weight:500;}
+  .pill{font-size:8px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 4px;border-radius:2px;}
+  .pill-teal{color:var(--accent-teal);border:1px solid rgba(20,184,166,0.3);}
+  .pill-blue{color:#5B9BD5;border:1px solid rgba(35,90,144,0.3);}
+
+  .tree-add-loc{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--ash);font-size:11px;border-top:1px solid var(--linen);transition:color 180ms;flex-shrink:0;}
+  .tree-add-loc:hover{color:var(--logo-blue);}
+
+  /* MAIN PANEL */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .top-bar{background:white;border-bottom:1px solid var(--linen);padding:0 18px;height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
+  .bc{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ash);}
+  .bc-active{color:var(--ink-text);font-weight:500;}
+  .sep{color:var(--linen);font-size:13px;}
+  .btn-primary{display:flex;align-items:center;gap:5px;background:var(--obsidian);border:1px solid var(--accent-gold);color:var(--accent-gold);font-family:'Inter',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:5px 11px;border-radius:2px;cursor:pointer;transition:all 220ms;}
+  .btn-primary:hover{background:var(--logo-blue);}
+  .btn-ghost{display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--linen);color:var(--ash);font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 9px;border-radius:2px;cursor:pointer;transition:all 180ms;}
+  .btn-ghost:hover{border-color:var(--ash);color:var(--ink-text);}
+
+  /* Property header */
+  .prop-header{padding:16px 18px 0;flex-shrink:0;}
+  .prop-eyebrow{font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ash);margin-bottom:3px;}
+  .prop-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;color:var(--ink-text);line-height:1.1;}
+  .prop-sub{font-size:10.5px;color:var(--silver);margin-top:3px;}
+
+  /* 5-Tab bar */
+  .media-tabs{display:flex;border-bottom:1px solid var(--linen);padding:0 18px;flex-shrink:0;margin-top:12px;overflow-x:auto;}
+  .media-tabs::-webkit-scrollbar{display:none;}
+  .mtab{display:flex;align-items:center;gap:5px;padding:8px 13px;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ash);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 200ms;}
+  .mtab:hover{color:var(--ink-text);}
+  .mtab.active{color:var(--logo-blue);border-bottom-color:var(--accent-gold);}
+  .mtab .ti{font-size:12px;}
+  .tc{font-size:8.5px;background:var(--bone);color:var(--ash);padding:2px 4px;border-radius:2px;font-weight:600;}
+  .mtab.active .tc{background:rgba(35,90,144,0.1);color:var(--logo-blue);}
+
+  /* Grid */
+  .media-body{flex:1;padding:14px 18px 18px;overflow-y:auto;}
+  .media-body::-webkit-scrollbar{width:3px;}
+  .media-body::-webkit-scrollbar-thumb{background:var(--linen);}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;}
+  .mcard{background:white;border:0.5px solid var(--linen);border-radius:3px;overflow:hidden;cursor:pointer;transition:border-color 200ms;position:relative;}
+  .mcard:hover{border-color:var(--logo-blue);}
+  .mcard:hover .ov{opacity:1;}
+  .mthumb{height:76px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .mthumb .ti{font-size:24px;color:var(--silver);}
+  .t-ph{background:linear-gradient(135deg,#C9D6DF,#A0B4C2);}
+  .t-vi{background:linear-gradient(135deg,#1A1C1E,#34393D);}
+  .t-vr{background:linear-gradient(135deg,#235A90,#1C4976);}
+  .t-bp{background:var(--bone);}
+  .t-am{background:linear-gradient(135deg,#E8ECF1,#DBE1E8);}
+  .ov{position:absolute;inset:0;background:rgba(35,90,144,0.55);display:flex;align-items:center;justify-content:center;gap:5px;opacity:0;transition:opacity 180ms;}
+  .ob{width:24px;height:24px;border:1px solid rgba(255,255,255,0.45);border-radius:2px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;}
+  .ob .ti{font-size:11px;color:white;}
+  .mi{padding:6px 8px;}
+  .mn{font-size:10.5px;font-weight:500;color:var(--ink-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mr{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+  .mm{font-size:9px;color:var(--silver);}
+  .sl{font-size:7.5px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 4px;border-radius:2px;color:var(--accent-teal);border:1px solid rgba(20,184,166,0.28);}
+  .sd{font-size:7.5px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 4px;border-radius:2px;color:var(--ash);border:1px solid var(--linen);}
+  .drop-zone{grid-column:1/-1;border:1.5px dashed var(--linen);border-radius:3px;padding:18px;text-align:center;cursor:pointer;transition:all 180ms;}
+  .drop-zone:hover{border-color:var(--logo-blue);background:rgba(35,90,144,0.02);}
+  .drop-zone .ti{font-size:18px;color:var(--linen);display:block;margin-bottom:4px;}
+  .drop-zone p{font-size:10.5px;color:var(--silver);}
+  .drop-zone strong{color:var(--logo-blue);font-weight:500;}
+  .play-r{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .play-c{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;}
+  .play-c .ti{font-size:10px;color:white;}
+
+  /* Empty state */
+  .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;}
+  .empty-icon{font-size:36px;color:var(--linen);margin-bottom:12px;}
+  .empty-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--ash);margin-bottom:6px;}
+  .empty-sub{font-size:11px;color:var(--silver);}
+
+  /* Property Editor */
+  .pe-section{border-bottom:1px solid var(--bone);}
+  .pe-section-head{display:flex;align-items:center;gap:7px;padding:11px 0;cursor:pointer;user-select:none;}
+  .pe-section-head span{font-size:11px;font-weight:500;color:var(--ink-text);flex:1;}
+  .pe-chevron{font-size:11px;color:var(--silver);transition:transform 280ms var(--ease-luxury);}
+  .pe-section.open .pe-chevron{transform:rotate(180deg);}
+  .pe-section-body{display:none;padding-bottom:14px;}
+  .pe-section.open .pe-section-body{display:block;}
+  .pe-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pe-field{display:flex;flex-direction:column;gap:4px;}
+  .pe-label{font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);}
+  .pe-hint{font-size:8px;text-transform:none;letter-spacing:0;color:var(--silver);}
+  .pe-input{width:100%;padding:7px 10px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;transition:border-color 180ms;}
+  .pe-input:focus{border-color:var(--logo-blue);}
+  select.pe-input{cursor:pointer;}
+  .unit-row{display:grid;grid-template-columns:auto 1fr 1fr 1fr auto;gap:7px;align-items:center;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:white;}
+  .unit-toggle{width:32px;height:18px;background:var(--linen);border-radius:9px;position:relative;cursor:pointer;transition:background 220ms;flex-shrink:0;}
+  .unit-toggle.on{background:var(--logo-blue);}
+  .unit-toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform 220ms;}
+  .unit-toggle.on::after{transform:translateX(14px);}
+  .unit-label{font-size:11px;font-weight:500;color:var(--ink-text);}
+  .unit-row.disabled .unit-label{color:var(--silver);}
+  .unit-row.disabled .pe-input{opacity:0.4;pointer-events:none;}
+  .amenity-check{display:flex;align-items:center;gap:7px;padding:6px 9px;border:0.5px solid var(--linen);border-radius:2px;background:white;cursor:pointer;transition:all 180ms;}
+  .amenity-check.checked{border-color:rgba(35,90,144,0.3);background:rgba(35,90,144,0.04);}
+  .amenity-check input{accent-color:var(--logo-blue);}
+  .amenity-check span{font-size:10.5px;color:var(--ash);}
+  .amenity-check.checked span{color:var(--ink-text);}
+  .procon-row{display:flex;align-items:center;gap:6px;}
+  .procon-row input{flex:1;padding:5px 8px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:10.5px;color:var(--ink-text);background:var(--pearl);outline:none;}
+  .procon-row input:focus{border-color:var(--logo-blue);}
+  .procon-del{width:18px;height:18px;background:none;border:none;cursor:pointer;color:var(--silver);font-size:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .procon-del:hover{color:var(--ash);}
+  .quiz-tag{display:flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid var(--linen);border-radius:2px;cursor:pointer;transition:all 180ms;font-size:9.5px;color:var(--ash);background:white;}
+  .quiz-tag.active{border-color:var(--logo-blue);background:rgba(35,90,144,0.07);color:var(--logo-blue);}
+  .prop-list-row{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;border-bottom:0.5px solid var(--bone);transition:background 160ms;}
+  .prop-list-row:hover{background:var(--pearl);}
+  .prop-list-row.active{background:rgba(35,90,144,0.07);border-left:2px solid var(--accent-gold);}
+  .prop-list-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .dot-rfo{background:var(--accent-teal);}
+  .dot-pre{background:var(--logo-blue);}
+  .prop-list-name{font-size:11.5px;color:var(--ash);flex:1;transition:color 180ms;}
+  .prop-list-row.active .prop-list-name{color:var(--ink-text);font-weight:500;}
+
+  /* Catalog Manager */
+  .cat-filter{padding:4px 10px;border:0.5px solid var(--linen);border-radius:2px;background:white;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ash);cursor:pointer;transition:all 180ms;}
+  .cat-filter:hover{border-color:var(--logo-blue);color:var(--logo-blue);}
+  .cat-filter.active{background:var(--obsidian);border-color:var(--obsidian);color:var(--accent-gold);}
+  .cat-status{padding:4px 10px;border:0.5px solid var(--linen);border-radius:2px;background:white;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:0.08em;color:var(--ash);cursor:pointer;transition:all 180ms;display:flex;align-items:center;}
+  .cat-status:hover{border-color:var(--logo-blue);}
+  .cat-status.active{border-color:var(--logo-blue);background:rgba(35,90,144,0.07);color:var(--logo-blue);}
+  /* Table view */
+  .cat-table{width:100%;border-collapse:collapse;}
+  .cat-table thead tr{border-bottom:1px solid var(--linen);position:sticky;top:0;background:white;z-index:2;}
+  .cat-table th{text-align:left;font-size:8px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--ash);padding:10px 14px 8px;white-space:nowrap;}
+  .cat-table td{padding:10px 14px;border-bottom:0.5px solid var(--bone);vertical-align:middle;}
+  .cat-table tbody tr:hover td{background:rgba(243,245,248,0.7);}
+  .cat-table tbody tr:hover .row-actions{opacity:1;}
+  .cat-table tbody tr:last-child td{border-bottom:none;}
+  .cat-dev-name{font-size:12px;font-weight:500;color:var(--ink-text);}
+  .cat-dev-loc{font-size:9.5px;color:var(--silver);margin-top:1px;}
+  .cat-price{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:14px;color:var(--ink-text);}
+  .cat-types{display:flex;gap:4px;flex-wrap:wrap;}
+  .cat-type-chip{font-size:8px;padding:2px 5px;border:0.5px solid var(--linen);border-radius:2px;color:var(--ash);background:var(--pearl);}
+  .cat-type-chip.on{border-color:rgba(35,90,144,0.25);color:var(--logo-blue);background:rgba(35,90,144,0.05);}
+  .row-actions{opacity:0;display:flex;gap:6px;transition:opacity 180ms;}
+  .row-btn{padding:4px 9px;border-radius:2px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.08em;cursor:pointer;transition:all 180ms;border:none;}
+  .row-btn-edit{background:var(--obsidian);color:var(--accent-gold);border:1px solid var(--accent-gold);}
+  .row-btn-edit:hover{background:var(--logo-blue);}
+  .row-btn-wa{background:#25D366;color:white;}
+  .row-btn-wa:hover{background:#1da851;}
+  .row-btn-vis{background:transparent;border:0.5px solid var(--linen);color:var(--ash);}
+  .row-btn-vis:hover{border-color:var(--ash);color:var(--ink-text);}
+  /* Card view */
+  .cat-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;padding:14px 18px;}
+  .cat-card{background:white;border:0.5px solid var(--linen);border-radius:3px;overflow:hidden;cursor:pointer;transition:border-color 200ms,transform 200ms;}
+  .cat-card:hover{border-color:var(--logo-blue);transform:translateY(-2px);}
+  .cat-card-thumb{height:100px;background:linear-gradient(135deg,var(--graphite),var(--obsidian));display:flex;align-items:flex-end;position:relative;overflow:hidden;}
+  .cat-card-thumb-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,28,30,0.65) 0%,transparent 60%);}
+  .cat-card-idx{position:absolute;bottom:8px;left:10px;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px;color:rgba(255,255,255,0.15);line-height:1;}
+  .cat-card-body{padding:10px 12px;}
+  .cat-card-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:15px;color:var(--ink-text);line-height:1.2;}
+  .cat-card-loc{font-size:9.5px;color:var(--silver);margin-top:2px;}
+  .cat-card-price{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:17px;color:var(--ink-text);margin-top:6px;}
+  .cat-card-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:0.5px solid var(--bone);}
+  .cat-card-actions{display:flex;gap:5px;margin-top:8px;}
+  /* Empty state */
+  .cat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center;}
+
+  /* Portfolio & other views */
+  .view-pad{padding:18px;overflow-y:auto;flex:1;}
+  .vt{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;color:var(--ink-text);margin-bottom:14px;}
+  .dtable{width:100%;border-collapse:collapse;font-size:11.5px;}
+  .dtable th{text-align:left;font-size:8.5px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);padding:0 9px 7px;border-bottom:1px solid var(--linen);}
+  .dtable td{padding:9px;border-bottom:0.5px solid var(--bone);color:var(--ink-text);vertical-align:middle;}
+  .dtable tr:hover td{background:rgba(243,245,248,0.6);}
+  .dtable tr:last-child td{border-bottom:none;}
+  .al{color:var(--logo-blue);font-size:10.5px;cursor:pointer;font-weight:500;}
+  .al:hover{color:var(--accent-gold);}
+  .asep{color:var(--linen);margin:0 3px;}
+
+  /* Social Media Cards */
+  .social-card{display:flex;align-items:center;gap:12px;padding:11px 14px;background:white;border:0.5px solid var(--linen);border-radius:3px;transition:border-color 200ms;}
+  .social-card:hover{border-color:rgba(35,90,144,0.25);}
+  .social-icon-wrap{width:34px;height:34px;border-radius:3px;border:1px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .social-meta{width:140px;flex-shrink:0;}
+  .social-label{font-size:11.5px;font-weight:600;color:var(--ink-text);}
+  .social-hint{font-size:9px;color:var(--silver);margin-top:2px;line-height:1.4;}
+  .social-input-wrap{flex:1;display:flex;align-items:center;border:0.5px solid var(--linen);border-radius:2px;overflow:hidden;background:var(--pearl);}
+  .social-input-wrap:focus-within{border-color:var(--logo-blue);}
+  .social-prefix{font-size:10px;color:var(--ash);padding:0 8px;white-space:nowrap;border-right:0.5px solid var(--linen);background:var(--bone);height:100%;display:flex;align-items:center;line-height:32px;}
+  .social-input{flex:1;padding:7px 10px;border:none;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:transparent;outline:none;}
+  .social-toggle-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;min-width:52px;}
+  .social-live-lbl{font-size:9px;color:var(--accent-teal);font-weight:500;}
+
+  /* Website Settings */
+  .stab{display:flex;align-items:center;gap:5px;padding:9px 13px;font-size:9.5px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ash);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 200ms;}
+  .stab:hover{color:var(--ink-text);}
+  .stab.active{color:var(--logo-blue);border-bottom-color:var(--accent-gold);}
+  .stab .ti{font-size:11px;}
+  .settings-body{padding:18px;display:flex;flex-direction:column;gap:14px;}
+  .settings-section-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;}
+  .settings-eyebrow{font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ash);margin-bottom:4px;}
+  .settings-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;color:var(--ink-text);margin-bottom:2px;}
+  .settings-sub{font-size:11px;color:var(--silver);}
+  .settings-card{background:white;border:0.5px solid var(--linen);border-radius:3px;padding:14px 16px;}
+  .settings-card-head{font-size:8.5px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .settings-card-head .ti{font-size:13px;}
+  .logo-upload-box{background:var(--pearl);border:0.5px solid var(--linen);border-radius:2px;padding:14px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72px;}
+  .upload-hint-row{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:9px;color:var(--ash);cursor:pointer;justify-content:center;}
+  .upload-hint-row:hover{color:var(--logo-blue);}
+  .color-swatch{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 6px;border:0.5px solid var(--linen);border-radius:2px;text-align:center;}
+  .sw-dot{width:24px;height:24px;border-radius:50%;}
+  .sw-name{font-size:8px;color:var(--ash);letter-spacing:0.05em;}
+  .sw-hex{font-family:'DM Mono',monospace;font-size:8px;color:var(--silver);}
+  .char-count{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:8.5px;color:var(--silver);pointer-events:none;}
+  .nav-item-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);}
+  .nav-item-label{font-size:11px;font-weight:500;color:var(--ink-text);min-width:70px;}
+  .nav-item-route{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--ash);flex:1;}
+  .nav-item-badge{font-size:8px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px;border:1px solid;flex-shrink:0;}
+  .nav-grip{font-size:13px;color:var(--linen);cursor:grab;flex-shrink:0;}
+  .oh-row{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:8px;}
+  .oh-day{font-size:11px;font-weight:500;color:var(--ink-text);}
+  .oh-input{padding:5px 8px!important;font-size:10.5px!important;}
+  .oh-toggle{display:flex;align-items:center;gap:5px;}
+</style>
+
+<h2 class="sr-only">Cityqlo Admin — Location-first tree with nested projects and per-project media tabs</h2>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">CQ</div>
+      <div>
+        <div class="logo-name">Cityqlo</div>
+        <div class="logo-sub">Admin</div>
+      </div>
+    </div>
+    <nav class="s-nav">
+      <div class="s-lbl">Listings</div>
+      <div class="s-item active" onclick="switchSection(this,'catalog')">
+        <i class="ti ti-map-pin s-icon" aria-hidden="true"></i>
+        <span class="s-text">Locations & Projects</span>
+        <span class="s-badge bg-gold">6</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'portfolio')">
+        <i class="ti ti-star s-icon" aria-hidden="true"></i>
+        <span class="s-text">Featured Portfolio</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'hero')">
+        <i class="ti ti-layout-navbar s-icon" aria-hidden="true"></i>
+        <span class="s-text">Hero Section</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'propdetails')">
+        <i class="ti ti-building-skyscraper s-icon" aria-hidden="true"></i>
+        <span class="s-text">Property Details</span>
+        <span class="s-badge bg-gold">6</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'catalog-mgr')">
+        <i class="ti ti-layout-list s-icon" aria-hidden="true"></i>
+        <span class="s-text">Catalog Manager</span>
+      </div>
+      <div class="divider"></div>
+      <div class="s-lbl">Frontend Pages</div>
+      <div class="s-item" onclick="switchSection(this,'compare')">
+        <i class="ti ti-columns-2 s-icon" aria-hidden="true"></i>
+        <span class="s-text">Compare Section</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'advisor')">
+        <i class="ti ti-user-star s-icon" aria-hidden="true"></i>
+        <span class="s-text">Advisor</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'socials')">
+        <i class="ti ti-share s-icon" aria-hidden="true"></i>
+        <span class="s-text">Social Media Links</span>
+      </div>
+      <div class="divider"></div>
+      <div class="s-lbl">System</div>
+      <div class="s-item" onclick="switchSection(this,'')">
+        <i class="ti ti-chart-bar s-icon" aria-hidden="true"></i>
+        <span class="s-text">Analytics</span>
+      </div>
+      <div class="s-item" onclick="switchSection(this,'settings')">
+        <i class="ti ti-settings s-icon" aria-hidden="true"></i>
+        <span class="s-text">Website Settings</span>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- CONTENT -->
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="bc">
+        <span id="bc1">Locations & Projects</span>
+        <span class="sep" id="bcs1" style="display:none">›</span>
+        <span id="bc2" style="display:none"></span>
+        <span class="sep" id="bcs2" style="display:none">›</span>
+        <span class="bc-active" id="bc3" style="display:none"></span>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center;">
+        <button class="btn-ghost"><i class="ti ti-upload" style="font-size:11px" aria-hidden="true"></i> Import</button>
+        <button class="btn-primary"><i class="ti ti-plus" style="font-size:11px" aria-hidden="true"></i><span id="add-lbl">Add Location</span></button>
+      </div>
+    </div>
+
+    <div style="flex:1;display:flex;overflow:hidden;">
+
+      <!-- ── CATALOG: tree + detail ── -->
+      <div id="sec-catalog" style="display:flex;flex:1;overflow:hidden;">
+
+        <!-- Tree pane -->
+        <div class="tree-pane">
+          <div class="tree-head">
+            <div class="tree-head-title">Locations & Projects</div>
+            <div class="search-wrap">
+              <i class="ti ti-search" aria-hidden="true"></i>
+              <input class="sinput" type="text" placeholder="Search…">
+            </div>
+          </div>
+          <div class="tree-body" id="tree-body"></div>
+          <div class="tree-add-loc" onclick="sendPrompt('How do I add a new location to the Cityqlo admin?')">
+            <i class="ti ti-plus" style="font-size:12px" aria-hidden="true"></i> Add Location
+          </div>
+        </div>
+
+        <!-- Detail pane -->
+        <div class="main" id="detail-pane">
+
+          <!-- No selection state -->
+          <div class="empty-state" id="empty-state">
+            <i class="ti ti-map-pin empty-icon" aria-hidden="true"></i>
+            <div class="empty-title">Select a project</div>
+            <div class="empty-sub">Choose a location then a project<br>to manage its media</div>
+          </div>
+
+          <!-- Project detail (hidden until selection) -->
+          <div id="proj-detail" style="display:none;flex:1;display:none;flex-direction:column;overflow:hidden;">
+            <div class="prop-header">
+              <div class="prop-eyebrow" id="d-eyebrow"></div>
+              <div class="prop-title" id="d-title"></div>
+              <div class="prop-sub" id="d-sub"></div>
+            </div>
+
+            <!-- 5 Tabs — N-7: never below 5 -->
+            <div class="media-tabs" role="tablist">
+              <div class="mtab active" role="tab" aria-selected="true"  id="mt-photo"     onclick="setTab('photo')"><i class="ti ti-photo" aria-hidden="true"></i> Photo <span class="tc" id="tc-photo">0</span></div>
+              <div class="mtab"        role="tab" aria-selected="false" id="mt-video"     onclick="setTab('video')"><i class="ti ti-video" aria-hidden="true"></i> Video <span class="tc" id="tc-video">0</span></div>
+              <div class="mtab"        role="tab" aria-selected="false" id="mt-360"       onclick="setTab('360')"><i class="ti ti-360-view" aria-hidden="true"></i> 360° <span class="tc" id="tc-360">0</span></div>
+              <div class="mtab"        role="tab" aria-selected="false" id="mt-blueprint" onclick="setTab('blueprint')"><i class="ti ti-ruler-2" aria-hidden="true"></i> Blueprint <span class="tc" id="tc-blueprint">0</span></div>
+              <div class="mtab"        role="tab" aria-selected="false" id="mt-amenities" onclick="setTab('amenities')"><i class="ti ti-swimming-pool" aria-hidden="true"></i> Amenities <span class="tc" id="tc-amenities">0</span></div>
+            </div>
+
+            <div class="media-body">
+              <!-- Photo -->
+              <div class="mgrid" id="mb-photo">
+                <div class="mcard"><div class="mthumb t-ph"><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Facade — Hero</p><div class="mr"><span class="mm">2.4 MB</span><span class="sl">Live</span></div></div></div>
+                <div class="mcard"><div class="mthumb t-ph"><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Living Room</p><div class="mr"><span class="mm">1.8 MB</span><span class="sl">Live</span></div></div></div>
+                <div class="mcard"><div class="mthumb t-ph"><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Pool Deck</p><div class="mr"><span class="mm">4.2 MB</span><span class="sd">Draft</span></div></div></div>
+                <div class="drop-zone"><i class="ti ti-upload" aria-hidden="true"></i><p><strong>Drop photos here</strong> or click</p><p style="font-size:9.5px;margin-top:2px;">JPG, PNG, WEBP · Max 10 MB</p></div>
+              </div>
+              <!-- Video -->
+              <div class="mgrid" id="mb-video" style="display:none;">
+                <div class="mcard"><div class="mthumb t-vi"><div class="play-r"><div class="play-c"><i class="ti ti-player-play"></i></div></div><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Aerial Tour</p><div class="mr"><span class="mm">2:14 · MP4</span><span class="sl">Live</span></div></div></div>
+                <div class="drop-zone"><i class="ti ti-upload" aria-hidden="true"></i><p><strong>Drop video here</strong></p><p style="font-size:9.5px;margin-top:2px;">MP4, MOV · Max 500 MB</p></div>
+              </div>
+              <!-- 360 -->
+              <div class="mgrid" id="mb-360" style="display:none;">
+                <div class="mcard"><div class="mthumb t-vr"><i class="ti ti-360-view" style="color:rgba(255,255,255,0.35)"></i><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Living Area</p><div class="mr"><span class="mm">Matterport</span><span class="sl">Live</span></div></div></div>
+                <div class="drop-zone"><i class="ti ti-link" aria-hidden="true"></i><p><strong>Paste embed URL</strong> or panorama</p><p style="font-size:9.5px;margin-top:2px;">Matterport · iGuide · Kuula</p></div>
+              </div>
+              <!-- Blueprint -->
+              <div class="mgrid" id="mb-blueprint" style="display:none;">
+                <div class="mcard"><div class="mthumb t-bp"><i class="ti ti-ruler-2" style="color:var(--ash)"></i><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Studio — 28sqm</p><div class="mr"><span class="mm">PDF</span><span class="sl">Live</span></div></div></div>
+                <div class="mcard"><div class="mthumb t-bp"><i class="ti ti-ruler-2" style="color:var(--ash)"></i><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">1BR — 42sqm</p><div class="mr"><span class="mm">PDF</span><span class="sl">Live</span></div></div></div>
+                <div class="drop-zone"><i class="ti ti-upload" aria-hidden="true"></i><p><strong>Upload floor plan</strong></p><p style="font-size:9.5px;margin-top:2px;">PDF, PNG, SVG</p></div>
+              </div>
+              <!-- Amenities -->
+              <div class="mgrid" id="mb-amenities" style="display:none;">
+                <div class="mcard"><div class="mthumb t-am"><i class="ti ti-swimming-pool" style="color:var(--ash)"></i><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Lap Pool</p><div class="mr"><span class="mm">3.6 MB</span><span class="sl">Live</span></div></div></div>
+                <div class="mcard"><div class="mthumb t-am"><i class="ti ti-barbell" style="color:var(--ash)"></i><div class="ov"><div class="ob"><i class="ti ti-eye"></i></div><div class="ob"><i class="ti ti-edit"></i></div><div class="ob"><i class="ti ti-trash"></i></div></div></div><div class="mi"><p class="mn">Fitness Gym</p><div class="mr"><span class="mm">2.1 MB</span><span class="sd">Draft</span></div></div></div>
+                <div class="drop-zone"><i class="ti ti-upload" aria-hidden="true"></i><p><strong>Upload amenity photo</strong></p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── HERO SECTION ── -->
+      <div id="sec-hero" style="display:none;flex:1;overflow-y:auto;">
+        <div class="view-pad">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+            <div>
+              <div style="font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ash);margin-bottom:4px;">Homepage</div>
+              <div class="vt" style="margin-bottom:2px;">Hero Section</div>
+              <div style="font-size:11px;color:var(--silver);">Manage the full-screen image or video shown above the fold on your homepage.</div>
+            </div>
+            <button class="btn-primary" style="flex-shrink:0;margin-top:4px;"><i class="ti ti-device-floppy" style="font-size:11px" aria-hidden="true"></i> Save Changes</button>
+          </div>
+
+          <!-- Type Toggle -->
+          <div style="display:flex;gap:0;margin-bottom:18px;margin-top:14px;border:1px solid var(--linen);border-radius:3px;overflow:hidden;width:fit-content;">
+            <button id="hero-type-img" onclick="setHeroType('image')" style="padding:7px 18px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border:none;cursor:pointer;transition:all 220ms;background:var(--obsidian);color:var(--accent-gold);">
+              <i class="ti ti-photo" style="font-size:11px;margin-right:5px;" aria-hidden="true"></i>Image
+            </button>
+            <button id="hero-type-vid" onclick="setHeroType('video')" style="padding:7px 18px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border:none;cursor:pointer;transition:all 220ms;background:white;color:var(--ash);border-left:1px solid var(--linen);">
+              <i class="ti ti-video" style="font-size:11px;margin-right:5px;" aria-hidden="true"></i>Video
+            </button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+
+            <!-- LEFT: Upload / Preview -->
+            <div>
+              <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:8px;">Current Hero</div>
+              <!-- Hero preview frame -->
+              <div style="background:linear-gradient(135deg,var(--graphite),var(--obsidian));border-radius:3px;border:1px solid var(--graphite);aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                <!-- Simulated hero overlay text -->
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,28,30,0.7) 0%,transparent 60%);"></div>
+                <div style="position:absolute;bottom:14px;left:16px;">
+                  <div style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(212,160,23,0.8);margin-bottom:3px;">DMCI Homes · Metro Manila</div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;font-style:italic;color:var(--white);line-height:1.1;">Your Sovereign Home<br>Awaits</div>
+                </div>
+                <!-- No media badge -->
+                <div id="hero-no-media" style="display:flex;flex-direction:column;align-items:center;gap:8px;z-index:1;">
+                  <i class="ti ti-photo" style="font-size:28px;color:rgba(255,255,255,0.15);"></i>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;">No hero media set</div>
+                </div>
+                <!-- Live badge -->
+                <div style="position:absolute;top:10px;right:10px;background:rgba(20,184,166,0.18);border:1px solid rgba(20,184,166,0.4);color:var(--accent-teal);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 7px;border-radius:2px;">Live Preview</div>
+              </div>
+
+              <!-- Drop zone -->
+              <div id="hero-drop" style="margin-top:10px;border:1.5px dashed var(--linen);border-radius:3px;padding:16px;text-align:center;cursor:pointer;transition:all 180ms;" onmouseover="this.style.borderColor='var(--logo-blue)';this.style.background='rgba(35,90,144,0.02)'" onmouseout="this.style.borderColor='var(--linen)';this.style.background=''">
+                <i class="ti ti-cloud-upload" style="font-size:20px;color:var(--linen);display:block;margin-bottom:6px;" aria-hidden="true"></i>
+                <div id="hero-drop-label" style="font-size:11px;color:var(--silver);">
+                  <strong style="color:var(--logo-blue);font-weight:500;">Click to upload</strong> or drag &amp; drop<br>
+                  <span id="hero-drop-hint" style="font-size:9.5px;">JPG, PNG, WEBP · Recommended 1920×1080 · Max 10 MB</span>
+                </div>
+              </div>
+
+              <!-- Alt text (image only) -->
+              <div id="hero-alt-wrap" style="margin-top:10px;">
+                <label style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);display:block;margin-bottom:5px;">Alt Text <span style="color:var(--silver);font-size:8px;text-transform:none;letter-spacing:0;">(for accessibility)</span></label>
+                <input type="text" value="Aerial view of a DMCI condo in Metro Manila" style="width:100%;padding:7px 10px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--logo-blue)'" onblur="this.style.borderColor='var(--linen)'">
+              </div>
+            </div>
+
+            <!-- RIGHT: Settings -->
+            <div style="display:flex;flex-direction:column;gap:13px;">
+
+              <!-- Overlay headline -->
+              <div>
+                <label style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);display:block;margin-bottom:5px;">Overlay Headline</label>
+                <input type="text" value="Your Sovereign Home Awaits" style="width:100%;padding:7px 10px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--logo-blue)'" onblur="this.style.borderColor='var(--linen)'">
+                <div style="font-size:9px;color:var(--silver);margin-top:4px;">Renders in Cormorant Garamond 300 italic over the hero.</div>
+              </div>
+
+              <!-- Sub-label -->
+              <div>
+                <label style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);display:block;margin-bottom:5px;">Eyebrow Label</label>
+                <input type="text" value="DMCI Homes · Metro Manila" style="width:100%;padding:7px 10px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--logo-blue)'" onblur="this.style.borderColor='var(--linen)'">
+              </div>
+
+              <!-- Overlay darkness -->
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                  <label style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);">Overlay Darkness</label>
+                  <span id="overlay-val" style="font-size:9px;color:var(--logo-blue);font-weight:600;">55%</span>
+                </div>
+                <input type="range" min="20" max="85" value="55" style="width:100%;accent-color:var(--logo-blue);" oninput="document.getElementById('overlay-val').textContent=this.value+'%'">
+                <div style="font-size:9px;color:var(--silver);margin-top:3px;">Controls text legibility against bright images.</div>
+              </div>
+
+              <!-- Video options (hidden by default) -->
+              <div id="hero-video-opts" style="display:none;flex-direction:column;gap:10px;">
+                <div>
+                  <label style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);display:block;margin-bottom:5px;">Video URL <span style="font-size:8px;color:var(--silver);text-transform:none;letter-spacing:0;">(MP4 or embed link)</span></label>
+                  <input type="text" placeholder="https://…/hero.mp4" style="width:100%;padding:7px 10px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--logo-blue)'" onblur="this.style.borderColor='var(--linen)'">
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                  <input type="checkbox" id="hero-muted" checked style="accent-color:var(--logo-blue);">
+                  <label for="hero-muted" style="font-size:11px;color:var(--ash);cursor:pointer;">Autoplay muted (recommended)</label>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                  <input type="checkbox" id="hero-loop" checked style="accent-color:var(--logo-blue);">
+                  <label for="hero-loop" style="font-size:11px;color:var(--ash);cursor:pointer;">Loop video</label>
+                </div>
+                <div>
+                  <label style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);display:block;margin-bottom:5px;">Poster / Fallback Image</label>
+                  <div style="border:1.5px dashed var(--linen);border-radius:2px;padding:10px 12px;text-align:center;cursor:pointer;font-size:10px;color:var(--silver);" onmouseover="this.style.borderColor='var(--logo-blue)'" onmouseout="this.style.borderColor='var(--linen)'">
+                    <i class="ti ti-photo" style="font-size:13px;margin-right:5px;color:var(--silver);" aria-hidden="true"></i>Upload poster frame for mobile / slow connections
+                  </div>
+                </div>
+              </div>
+
+              <!-- CTA button config -->
+              <div style="border-top:1px solid var(--linen);padding-top:13px;">
+                <div style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);margin-bottom:8px;">CTA Button</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div>
+                    <label style="font-size:8.5px;color:var(--silver);display:block;margin-bottom:4px;">Button Label</label>
+                    <input type="text" value="Explore Condos" style="width:100%;padding:6px 8px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--logo-blue)'" onblur="this.style.borderColor='var(--linen)'">
+                  </div>
+                  <div>
+                    <label style="font-size:8.5px;color:var(--silver);display:block;margin-bottom:4px;">Link / Route</label>
+                    <input type="text" value="#/property-detail" style="width:100%;padding:6px 8px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--logo-blue)'" onblur="this.style.borderColor='var(--linen)'">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Info note -->
+              <div style="padding:10px 12px;background:rgba(35,90,144,0.05);border:1px solid rgba(35,90,144,0.15);border-radius:2px;">
+                <div style="font-size:9px;color:var(--logo-blue);letter-spacing:0.06em;font-weight:500;margin-bottom:3px;">💡 BEST PRACTICES</div>
+                <ul style="margin:0;padding-left:14px;font-size:9.5px;color:var(--ash);line-height:1.7;">
+                  <li>Use landscape 16:9 for images · min 1920×1080</li>
+                  <li>Videos: keep under 30 sec for fast load</li>
+                  <li>Set overlay ≥ 50% when text is white on light images</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROPERTY DETAILS ── -->
+      <div id="sec-propdetails" style="display:none;flex:1;overflow:hidden;flex-direction:column;">
+
+        <!-- Two-pane: property list left + editor right -->
+        <div style="display:flex;flex:1;overflow:hidden;">
+
+          <!-- Property list pane -->
+          <div style="width:220px;min-width:220px;background:white;border-right:1px solid var(--linen);display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:13px 14px 10px;border-bottom:1px solid var(--linen);flex-shrink:0;">
+              <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:7px;">All Properties</div>
+              <div style="position:relative;">
+                <i class="ti ti-search" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--silver);" aria-hidden="true"></i>
+                <input class="sinput" type="text" placeholder="Search properties…" oninput="filterPropList(this.value)">
+              </div>
+            </div>
+            <div style="flex:1;overflow-y:auto;" id="prop-list-body">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Editor pane -->
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;" id="prop-editor-pane">
+
+            <!-- Empty state -->
+            <div class="empty-state" id="prop-editor-empty">
+              <i class="ti ti-building-skyscraper empty-icon" aria-hidden="true"></i>
+              <div class="empty-title">Select a property</div>
+              <div class="empty-sub">Choose a property on the left<br>to edit its types and details</div>
+            </div>
+
+            <!-- Editor (hidden until selection) -->
+            <div id="prop-editor" style="display:none;flex:1;overflow-y:auto;">
+
+              <!-- Editor top bar -->
+              <div style="background:white;border-bottom:1px solid var(--linen);padding:0 18px;height:48px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <span id="pe-status-badge" class="sl">RFO</span>
+                  <span id="pe-title-bar" style="font-size:13px;font-weight:500;color:var(--ink-text);font-family:'Cormorant Garamond',serif;"></span>
+                </div>
+                <div style="display:flex;gap:7px;">
+                  <button class="btn-ghost" onclick="discardChanges()"><i class="ti ti-x" style="font-size:11px" aria-hidden="true"></i> Discard</button>
+                  <button class="btn-primary" onclick="savePropertyChanges()"><i class="ti ti-device-floppy" style="font-size:11px" aria-hidden="true"></i> Save</button>
+                </div>
+              </div>
+
+              <div style="padding:16px 20px;display:flex;flex-direction:column;gap:0;">
+
+                <!-- Section: Basic Info -->
+                <div class="pe-section">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-info-circle" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Basic Info</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div class="pe-field-grid">
+                      <div class="pe-field">
+                        <label class="pe-label">Property Name</label>
+                        <input class="pe-input" id="pf-name" type="text">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Developer</label>
+                        <input class="pe-input" id="pf-dev" type="text" value="DMCI Homes">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Location / City</label>
+                        <input class="pe-input" id="pf-location" type="text">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Status</label>
+                        <select class="pe-input" id="pf-status">
+                          <option value="rfo">RFO — Ready for Occupancy</option>
+                          <option value="pre">Pre-Selling</option>
+                        </select>
+                      </div>
+                      <div class="pe-field" style="grid-column:1/-1;">
+                        <label class="pe-label">Short Teaser <span class="pe-hint">(shown on property cards)</span></label>
+                        <textarea class="pe-input" id="pf-teaser" rows="2" style="resize:vertical;"></textarea>
+                      </div>
+                      <div class="pe-field" style="grid-column:1/-1;">
+                        <label class="pe-label">Editorial Overview <span class="pe-hint">(paragraph shown on detail page)</span></label>
+                        <textarea class="pe-input" id="pf-overview" rows="3" style="resize:vertical;"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Pricing -->
+                <div class="pe-section">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-currency-peso" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Pricing</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div class="pe-field-grid">
+                      <div class="pe-field">
+                        <label class="pe-label">Starting Price</label>
+                        <div style="position:relative;">
+                          <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ash);">₱</span>
+                          <input class="pe-input" id="pf-price-from" type="text" style="padding-left:20px;" placeholder="3,200,000">
+                        </div>
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Up To</label>
+                        <div style="position:relative;">
+                          <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ash);">₱</span>
+                          <input class="pe-input" id="pf-price-to" type="text" style="padding-left:20px;" placeholder="8,000,000">
+                        </div>
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Down Payment Terms</label>
+                        <input class="pe-input" id="pf-dp" type="text" placeholder="e.g. 0% DP / In-house">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Resort Index ★</label>
+                        <input class="pe-input" id="pf-resort" type="number" min="1" max="5" step="0.1" placeholder="4.8">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Unit Types -->
+                <div class="pe-section">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-layout-2" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Unit Types</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div style="font-size:9px;color:var(--silver);margin-bottom:10px;">Toggle which unit types this property offers. Each type can have its own size range and price.</div>
+                    <div id="unit-types-container" style="display:flex;flex-direction:column;gap:8px;">
+                      <!-- rendered by JS -->
+                    </div>
+                    <button onclick="addUnitType()" style="margin-top:10px;width:100%;padding:7px;border:1.5px dashed var(--linen);background:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:10px;color:var(--ash);border-radius:2px;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 180ms;" onmouseover="this.style.borderColor='var(--logo-blue)';this.style.color='var(--logo-blue)'" onmouseout="this.style.borderColor='var(--linen)';this.style.color='var(--ash)'">
+                      <i class="ti ti-plus" aria-hidden="true"></i> Add Unit Type
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Section: Key Specs -->
+                <div class="pe-section">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-list-details" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Key Specs</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div class="pe-field-grid">
+                      <div class="pe-field">
+                        <label class="pe-label">Total Units</label>
+                        <input class="pe-input" id="pf-units" type="text" placeholder="e.g. 1,234 units">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">No. of Towers</label>
+                        <input class="pe-input" id="pf-towers" type="text" placeholder="e.g. 3 towers">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Floors per Tower</label>
+                        <input class="pe-input" id="pf-floors" type="text" placeholder="e.g. 22 floors">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">RFO / Turnover Date</label>
+                        <input class="pe-input" id="pf-rfo-date" type="text" placeholder="e.g. Q4 2025 or Ready">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Lot Area (sqm)</label>
+                        <input class="pe-input" id="pf-lot" type="text" placeholder="e.g. 2.4 hectares">
+                      </div>
+                      <div class="pe-field">
+                        <label class="pe-label">Parking Available</label>
+                        <select class="pe-input" id="pf-parking">
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                          <option value="limited">Limited slots</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Amenities -->
+                <div class="pe-section">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-swimming-pool" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Amenities</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div style="font-size:9px;color:var(--silver);margin-bottom:10px;">Check all amenities this property has. These appear on the Amenities tab of the property detail page.</div>
+                    <div id="amenities-checklist" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                      <!-- rendered by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Pros & Cons -->
+                <div class="pe-section">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-scale" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Pros &amp; Cons</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                      <div>
+                        <div style="font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent-teal);margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-thumb-up" style="font-size:11px;"></i> Pros</div>
+                        <div id="pros-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+                        <button onclick="addProCon('pro')" style="margin-top:7px;width:100%;padding:6px;border:1.5px dashed rgba(20,184,166,0.3);background:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:9.5px;color:var(--accent-teal);border-radius:2px;display:flex;align-items:center;justify-content:center;gap:4px;" onmouseover="this.style.borderColor='var(--accent-teal)'" onmouseout="this.style.borderColor='rgba(20,184,166,0.3)'"><i class="ti ti-plus"></i> Add Pro</button>
+                      </div>
+                      <div>
+                        <div style="font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ash);margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-thumb-down" style="font-size:11px;"></i> Cons</div>
+                        <div id="cons-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+                        <button onclick="addProCon('con')" style="margin-top:7px;width:100%;padding:6px;border:1.5px dashed var(--linen);background:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:9.5px;color:var(--ash);border-radius:2px;display:flex;align-items:center;justify-content:center;gap:4px;" onmouseover="this.style.borderColor='var(--ash)'" onmouseout="this.style.borderColor='var(--linen)'"><i class="ti ti-plus"></i> Add Con</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Quiz Tags -->
+                <div class="pe-section" style="border-bottom:none;">
+                  <div class="pe-section-head" onclick="togglePeSection(this)">
+                    <i class="ti ti-tag" style="font-size:12px;color:var(--logo-blue);" aria-hidden="true"></i>
+                    <span>Quiz Match Tags</span>
+                    <i class="ti ti-chevron-down pe-chevron" aria-hidden="true"></i>
+                  </div>
+                  <div class="pe-section-body">
+                    <div style="font-size:9px;color:var(--silver);margin-bottom:10px;">These tags determine how this property scores in the Condo Matchmaker quiz results.</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px;" id="quiz-tags-wrap">
+                      <!-- rendered by JS -->
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CATALOG MANAGER ── -->
+      <div id="sec-catalog-mgr" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+
+        <!-- Toolbar -->
+        <div style="background:white;border-bottom:1px solid var(--linen);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <!-- Search -->
+          <div style="position:relative;flex:1;max-width:260px;">
+            <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--silver);" aria-hidden="true"></i>
+            <input id="cat-search" type="text" placeholder="Search developments, locations…" oninput="renderCatalog()" style="width:100%;padding:6px 9px 6px 28px;border:0.5px solid var(--linen);border-radius:2px;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-text);background:var(--pearl);outline:none;" onfocus="this.style.borderColor='var(--accent-gold)';this.style.borderBottomWidth='2px'" onblur="this.style.borderColor='var(--linen)';this.style.borderBottomWidth='0.5px'">
+          </div>
+          <!-- Location filters -->
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span style="font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--silver);margin-right:2px;">Filter:</span>
+            <button class="cat-filter active" onclick="setCatFilter(this,'ALL')">All</button>
+            <button class="cat-filter" onclick="setCatFilter(this,'Pasig')">Pasig</button>
+            <button class="cat-filter" onclick="setCatFilter(this,'Parañaque')">Parañaque</button>
+            <button class="cat-filter" onclick="setCatFilter(this,'Quezon City')">QC</button>
+            <button class="cat-filter" onclick="setCatFilter(this,'Mandaluyong')">Mandaluyong</button>
+            <button class="cat-filter" onclick="setCatFilter(this,'Las Piñas')">Las Piñas</button>
+          </div>
+          <!-- Status filter -->
+          <div style="display:flex;gap:4px;">
+            <button class="cat-status active" onclick="setCatStatus(this,'all')">All Status</button>
+            <button class="cat-status" onclick="setCatStatus(this,'rfo')"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-teal);display:inline-block;margin-right:4px;"></span>RFO</button>
+            <button class="cat-status" onclick="setCatStatus(this,'pre')"><span style="width:6px;height:6px;border-radius:50%;background:var(--logo-blue);display:inline-block;margin-right:4px;"></span>Pre-Selling</button>
+          </div>
+          <!-- View toggle -->
+          <div style="display:flex;border:1px solid var(--linen);border-radius:2px;overflow:hidden;margin-left:auto;">
+            <button id="view-table-btn" onclick="setCatalogView('table')" title="Table view" style="padding:5px 9px;border:none;background:var(--obsidian);color:var(--accent-gold);cursor:pointer;font-size:13px;transition:all 180ms;"><i class="ti ti-table" aria-hidden="true"></i></button>
+            <button id="view-card-btn" onclick="setCatalogView('card')" title="Card view" style="padding:5px 9px;border:none;background:white;color:var(--ash);cursor:pointer;font-size:13px;border-left:1px solid var(--linen);transition:all 180ms;"><i class="ti ti-layout-grid" aria-hidden="true"></i></button>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div style="background:var(--pearl);border-bottom:1px solid var(--linen);padding:7px 18px;display:flex;align-items:center;gap:20px;flex-shrink:0;">
+          <div id="cat-stat-total" style="font-size:10px;color:var(--ash);"><span style="font-weight:600;color:var(--ink-text);font-size:12px;">6</span> properties</div>
+          <div style="font-size:10px;color:var(--ash);"><span style="font-weight:600;color:var(--accent-teal);font-size:12px;">3</span> RFO</div>
+          <div style="font-size:10px;color:var(--ash);"><span style="font-weight:600;color:var(--logo-blue);font-size:12px;">3</span> Pre-Selling</div>
+          <div id="cat-stat-range" style="font-size:10px;color:var(--ash);">Price range: <span style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ink-text);">₱3.1M – ₱14M</span></div>
+        </div>
+
+        <!-- Table / Card body -->
+        <div style="flex:1;overflow-y:auto;" id="cat-body">
+          <!-- rendered by JS -->
+        </div>
+
+      </div>
+
+      <!-- ── COMPARE SECTION ── -->
+      <div id="sec-compare" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div class="view-pad" style="overflow-y:auto;flex:1;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+            <div>
+              <div style="font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ash);margin-bottom:4px;">Frontend · #/compare</div>
+              <div class="vt" style="margin-bottom:2px;">Compare Section</div>
+              <div style="font-size:11px;color:var(--silver);">Manage which properties appear in the comparison table visible to buyers on the frontend.</div>
+            </div>
+            <button class="btn-primary" style="flex-shrink:0;margin-top:4px;"><i class="ti ti-device-floppy" style="font-size:11px" aria-hidden="true"></i> Save Changes</button>
+          </div>
+
+          <!-- Section Header Settings -->
+          <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;margin-top:16px;margin-bottom:14px;">
+            <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-settings" style="font-size:11px;color:var(--logo-blue);"></i> Section Settings</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="pe-field">
+                <label class="pe-label">Page Heading</label>
+                <input class="pe-input" type="text" value="Development Comparison" style="font-family:'Cormorant Garamond',serif;font-size:15px;">
+                <div style="font-size:9px;color:var(--silver);margin-top:3px;">Renders Cormorant Garamond 64px centered on the page.</div>
+              </div>
+              <div class="pe-field">
+                <label class="pe-label">Footer CTA Text</label>
+                <input class="pe-input" type="text" value="Need help deciding? Chat with Jerwin →">
+                <div style="font-size:9px;color:var(--silver);margin-top:3px;">Appears below the comparison table.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Highlight Column -->
+          <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;margin-bottom:14px;">
+            <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-star" style="font-size:11px;color:var(--accent-gold);"></i> Active / Highlighted Column</div>
+            <div style="font-size:11px;color:var(--silver);margin-bottom:10px;">The highlighted column gets a gold border and soft gold background — draws buyer attention to your top recommendation.</div>
+            <select class="pe-input" style="max-width:280px;">
+              <option value="">— No highlight —</option>
+              <option value="arista">Arista Place · Parañaque</option>
+              <option value="kai">Kai Garden Residences · Mandaluyong</option>
+              <option value="lumiere" selected>Lumiere Residences · Pasig</option>
+              <option value="levina">Levina Place · Pasig</option>
+              <option value="magnolia">Magnolia Place · Quezon City</option>
+              <option value="cherry">Cherry Residences · Las Piñas</option>
+            </select>
+          </div>
+
+          <!-- Comparison Table Rows -->
+          <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;margin-bottom:14px;">
+            <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="display:flex;align-items:center;gap:6px;"><i class="ti ti-table-row" style="font-size:11px;color:var(--logo-blue);"></i> Comparison Rows</span>
+              <span style="font-size:8.5px;color:var(--silver);text-transform:none;letter-spacing:0;">Drag to reorder (live UI)</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;" id="compare-rows-list">
+              <!-- rows rendered inline for demo -->
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                <i class="ti ti-grip-vertical" style="font-size:12px;color:var(--linen);cursor:grab;"></i>
+                <input type="checkbox" checked style="accent-color:var(--logo-blue);">
+                <span style="font-size:11px;font-weight:500;color:var(--ink-text);flex:1;">Location</span>
+                <span style="font-size:9px;color:var(--silver);">e.g. Parañaque · Near NAIA</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                <i class="ti ti-grip-vertical" style="font-size:12px;color:var(--linen);cursor:grab;"></i>
+                <input type="checkbox" checked style="accent-color:var(--logo-blue);">
+                <span style="font-size:11px;font-weight:500;color:var(--ink-text);flex:1;">Starting Price</span>
+                <span style="font-size:9px;color:var(--silver);">e.g. From ₱3.2M</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                <i class="ti ti-grip-vertical" style="font-size:12px;color:var(--linen);cursor:grab;"></i>
+                <input type="checkbox" checked style="accent-color:var(--logo-blue);">
+                <span style="font-size:11px;font-weight:500;color:var(--ink-text);flex:1;">RFO Date</span>
+                <span style="font-size:9px;color:var(--silver);">e.g. Ready or Q4 2027</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                <i class="ti ti-grip-vertical" style="font-size:12px;color:var(--linen);cursor:grab;"></i>
+                <input type="checkbox" checked style="accent-color:var(--logo-blue);">
+                <span style="font-size:11px;font-weight:500;color:var(--ink-text);flex:1;">Target Buyer</span>
+                <span style="font-size:9px;color:var(--silver);">e.g. OFW, Young Professional, Family</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--linen);border-radius:2px;background:var(--pearl);">
+                <i class="ti ti-grip-vertical" style="font-size:12px;color:var(--linen);cursor:grab;"></i>
+                <input type="checkbox" checked style="accent-color:var(--logo-blue);">
+                <span style="font-size:11px;font-weight:500;color:var(--ink-text);flex:1;">Rental Demand</span>
+                <span style="font-size:9px;color:var(--silver);">e.g. High, Moderate, Rising</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px dashed var(--linen);border-radius:2px;cursor:pointer;transition:all 180ms;" onmouseover="this.style.borderColor='var(--logo-blue)'" onmouseout="this.style.borderColor='var(--linen)'">
+                <i class="ti ti-plus" style="font-size:11px;color:var(--silver);margin-left:20px;"></i>
+                <span style="font-size:10.5px;color:var(--ash);">Add comparison row</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Properties shown in comparison -->
+          <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;margin-bottom:14px;">
+            <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-building-skyscraper" style="font-size:11px;color:var(--logo-blue);"></i> Properties in Comparison Table <span style="font-size:8.5px;color:var(--silver);text-transform:none;letter-spacing:0;">(max 4 columns recommended)</span></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;" id="compare-props-grid">
+              <div style="border:0.5px solid rgba(35,90,144,0.3);border-radius:2px;padding:9px 11px;background:rgba(35,90,144,0.04);position:relative;">
+                <div style="font-size:9px;color:var(--accent-teal);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">RFO</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ink-text);">Arista Place</div>
+                <div style="font-size:9.5px;color:var(--silver);margin-top:1px;">Parañaque</div>
+                <div style="position:absolute;top:7px;right:8px;width:14px;height:14px;border-radius:50%;background:var(--accent-teal);display:flex;align-items:center;justify-content:center;" title="Visible"><i class="ti ti-check" style="font-size:8px;color:white;"></i></div>
+              </div>
+              <div style="border:0.5px solid rgba(212,160,23,0.4);border-radius:2px;padding:9px 11px;background:rgba(212,160,23,0.04);position:relative;">
+                <div style="font-size:9px;color:var(--accent-teal);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">RFO</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ink-text);">Lumiere Residences</div>
+                <div style="font-size:9.5px;color:var(--silver);margin-top:1px;">Pasig · <span style="color:var(--accent-gold);">★ Highlighted</span></div>
+                <div style="position:absolute;top:7px;right:8px;width:14px;height:14px;border-radius:50%;background:var(--accent-teal);display:flex;align-items:center;justify-content:center;" title="Visible"><i class="ti ti-check" style="font-size:8px;color:white;"></i></div>
+              </div>
+              <div style="border:0.5px solid rgba(35,90,144,0.3);border-radius:2px;padding:9px 11px;background:rgba(35,90,144,0.04);position:relative;">
+                <div style="font-size:9px;color:var(--logo-blue);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">Pre</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ink-text);">Kai Garden</div>
+                <div style="font-size:9.5px;color:var(--silver);margin-top:1px;">Mandaluyong</div>
+                <div style="position:absolute;top:7px;right:8px;width:14px;height:14px;border-radius:50%;background:var(--accent-teal);display:flex;align-items:center;justify-content:center;" title="Visible"><i class="ti ti-check" style="font-size:8px;color:white;"></i></div>
+              </div>
+              <div style="border:0.5px solid var(--linen);border-radius:2px;padding:9px 11px;background:var(--pearl);opacity:0.55;position:relative;">
+                <div style="font-size:9px;color:var(--silver);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">Pre</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ash);">Magnolia Place</div>
+                <div style="font-size:9.5px;color:var(--silver);margin-top:1px;">Quezon City</div>
+                <div style="position:absolute;top:7px;right:8px;width:14px;height:14px;border-radius:50%;background:var(--linen);display:flex;align-items:center;justify-content:center;" title="Hidden"><i class="ti ti-eye-off" style="font-size:8px;color:var(--silver);"></i></div>
+              </div>
+            </div>
+            <div style="font-size:9px;color:var(--silver);margin-top:9px;"><i class="ti ti-info-circle" style="font-size:10px;"></i> Click any property card above to toggle its visibility in the comparison table. Go to <span style="color:var(--logo-blue);cursor:pointer;font-weight:500;">Catalog Manager</span> to edit full property data.</div>
+          </div>
+
+          <!-- Preview hint -->
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--pearl);border:1px solid var(--bone);border-radius:2px;margin-bottom:14px;">
+            <i class="ti ti-external-link" style="font-size:13px;color:var(--logo-blue);flex-shrink:0;"></i>
+            <div style="font-size:10.5px;color:var(--ash);">Preview this section live at <span style="color:var(--logo-blue);font-weight:500;cursor:pointer;">cityqlo.com/#/compare</span> — changes appear after saving.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADVISOR ── -->
+      <div id="sec-advisor" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div class="view-pad" style="overflow-y:auto;flex:1;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+            <div>
+              <div style="font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ash);margin-bottom:4px;">Frontend · Advisor Profile</div>
+              <div class="vt" style="margin-bottom:2px;">Advisor</div>
+              <div style="font-size:11px;color:var(--silver);">Manage the advisor profile, WhatsApp contact, and availability shown to buyers across the site.</div>
+            </div>
+            <button class="btn-primary" style="flex-shrink:0;margin-top:4px;"><i class="ti ti-device-floppy" style="font-size:11px" aria-hidden="true"></i> Save Changes</button>
+          </div>
+
+          <!-- Advisor Profile Card -->
+          <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:16px;align-items:start;">
+
+            <!-- Left: Photo -->
+            <div>
+              <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:8px;">Advisor Photo</div>
+              <!-- Photo preview -->
+              <div style="background:linear-gradient(135deg,var(--graphite),var(--charcoal));border-radius:3px;border:1px solid var(--graphite);aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;max-width:200px;">
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,28,30,0.72) 0%,transparent 55%);"></div>
+                <div style="position:absolute;bottom:14px;left:0;right:0;text-align:center;padding:0 12px;">
+                  <div style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--white);line-height:1.15;">Jerwin Santos</div>
+                  <div style="font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(212,160,23,0.85);margin-top:3px;">DMCI Accredited</div>
+                </div>
+                <i class="ti ti-user" style="font-size:32px;color:rgba(255,255,255,0.15);z-index:1;"></i>
+                <div style="position:absolute;top:9px;left:9px;background:rgba(20,184,166,0.18);border:1px solid rgba(20,184,166,0.4);color:var(--accent-teal);font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;">Active</div>
+              </div>
+              <!-- Upload drop -->
+              <div style="margin-top:8px;border:1.5px dashed var(--linen);border-radius:2px;padding:10px;text-align:center;cursor:pointer;transition:all 180ms;max-width:200px;" onmouseover="this.style.borderColor='var(--logo-blue)';this.style.background='rgba(35,90,144,0.02)'" onmouseout="this.style.borderColor='var(--linen)';this.style.background=''">
+                <i class="ti ti-cloud-upload" style="font-size:16px;color:var(--linen);display:block;margin-bottom:4px;" aria-hidden="true"></i>
+                <div style="font-size:10px;color:var(--silver);"><strong style="color:var(--logo-blue);font-weight:500;">Upload photo</strong><br><span style="font-size:9px;">JPG, PNG · 3:4 ratio · Max 5 MB</span></div>
+              </div>
+            </div>
+
+            <!-- Right: Fields -->
+            <div style="display:flex;flex-direction:column;gap:13px;">
+
+              <!-- Name & Title -->
+              <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;">
+                <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-id-badge" style="font-size:11px;color:var(--logo-blue);"></i> Identity</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="pe-field">
+                    <label class="pe-label">Full Name</label>
+                    <input class="pe-input" type="text" value="Jerwin Santos">
+                  </div>
+                  <div class="pe-field">
+                    <label class="pe-label">Professional Title</label>
+                    <input class="pe-input" type="text" value="DMCI Accredited Property Advisor">
+                  </div>
+                  <div class="pe-field" style="grid-column:1/-1;">
+                    <label class="pe-label">Short Bio <span class="pe-hint">(shown on quiz results and advisor section)</span></label>
+                    <textarea class="pe-input" rows="2" style="resize:vertical;">Expert in DMCI properties across Metro Manila. Zero-pressure. Free consultation.</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact / WhatsApp -->
+              <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;">
+                <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-brand-whatsapp" style="font-size:11px;color:#25D366;"></i> WhatsApp Contact</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="pe-field">
+                    <label class="pe-label">WhatsApp Number <span class="pe-hint">(with country code, no +)</span></label>
+                    <input class="pe-input" type="text" value="639170000000" placeholder="639170000000">
+                    <div style="font-size:9px;color:var(--silver);margin-top:3px;">Used in all wa.me links across the site.</div>
+                  </div>
+                  <div class="pe-field">
+                    <label class="pe-label">WhatsApp Button Label</label>
+                    <input class="pe-input" type="text" value="INQUIRE VIA WHATSAPP →">
+                  </div>
+                  <div class="pe-field" style="grid-column:1/-1;">
+                    <label class="pe-label">Default Pre-fill Message</label>
+                    <textarea class="pe-input" rows="2" style="resize:vertical;">Hi Jerwin! I found Cityqlo and I'm interested in a DMCI condo. Can you help me?</textarea>
+                    <div style="font-size:9px;color:var(--silver);margin-top:3px;">Used when no specific property is referenced (e.g. homepage CTA).</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Availability Status -->
+              <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;">
+                <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-clock" style="font-size:11px;color:var(--logo-blue);"></i> Availability & Badges</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="pe-field">
+                    <label class="pe-label">Availability Label <span class="pe-hint">(shown on advisor card)</span></label>
+                    <input class="pe-input" type="text" value="Available Mon – Sat, 9AM – 7PM">
+                  </div>
+                  <div class="pe-field">
+                    <label class="pe-label">Accreditation Badge Text</label>
+                    <input class="pe-input" type="text" value="DMCI Homes Accredited">
+                  </div>
+                  <div class="pe-field" style="grid-column:1/-1;">
+                    <label class="pe-label">Trust Tags <span class="pe-hint">(comma-separated · shown below bio)</span></label>
+                    <input class="pe-input" type="text" value="No commitment, Zero pressure, Free consultation">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Advisor visible on pages -->
+              <div style="background:white;border:1px solid var(--linen);border-radius:3px;padding:14px 16px;">
+                <div style="font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ash);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-eye" style="font-size:11px;color:var(--logo-blue);"></i> Show Advisor On</div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px;">
+                  <div class="amenity-check checked"><input type="checkbox" checked style="accent-color:var(--logo-blue);"><span>Property Detail Pages</span></div>
+                  <div class="amenity-check checked"><input type="checkbox" checked style="accent-color:var(--logo-blue);"><span>Quiz Results</span></div>
+                  <div class="amenity-check checked"><input type="checkbox" checked style="accent-color:var(--logo-blue);"><span>Compare Page Footer</span></div>
+                  <div class="amenity-check"><input type="checkbox" style="accent-color:var(--logo-blue);"><span>Homepage Hero</span></div>
+                  <div class="amenity-check checked"><input type="checkbox" checked style="accent-color:var(--logo-blue);"><span>Insights Articles</span></div>
+                  <div class="amenity-check"><input type="checkbox" style="accent-color:var(--logo-blue);"><span>404 Page</span></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Live preview hint -->
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--obsidian);border:1px solid var(--accent-gold);border-radius:2px;margin-top:14px;">
+            <i class="ti ti-brand-whatsapp" style="font-size:14px;color:#25D366;flex-shrink:0;"></i>
+            <div style="font-size:10.5px;color:var(--silver);">All WhatsApp buttons across the site pull from the number set above. Test your link: <span style="color:var(--accent-gold);font-weight:500;cursor:pointer;" onclick="window.open('https://wa.me/639170000000','_blank')">wa.me/639170000000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SOCIAL MEDIA LINKS ── -->
+      <div id="sec-socials" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div class="view-pad" style="overflow-y:auto;flex:1;">
+
+          <!-- Header -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+            <div>
+              <div style="font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ash);margin-bottom:4px;">Brand · Social Presence</div>
+              <div class="vt" style="margin-bottom:2px;">Social Media Links</div>
+              <div style="font-size:11px;color:var(--silver);">All links entered here are used sitewide — footer, advisor card, and any share buttons.</div>
+            </div>
+            <button class="btn-primary" style="flex-shrink:0;margin-top:4px;" onclick="saveSocials()">
+              <i class="ti ti-device-floppy" style="font-size:11px" aria-hidden="true"></i> Save Changes
+            </button>
+          </div>
+
+          <!-- Status banner -->
+          <div id="socials-saved-msg" style="display:none;align-items:center;gap:8px;padding:9px 14px;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.3);border-radius:2px;margin-bottom:12px;">
+            <i class="ti ti-circle-check" style="font-size:13px;color:var(--accent-teal);"></i>
+            <span style="font-size:10.5px;color:var(--accent-teal);">Social links saved successfully. Changes are live on the site.</span>
+          </div>
+
+          <!-- Platform cards grid -->
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;" id="socials-list">
+
+            <!-- Facebook -->
+            <div class="social-card" data-platform="facebook">
+              <div class="social-icon-wrap" style="background:rgba(24,119,242,0.1);border-color:rgba(24,119,242,0.25);">
+                <i class="ti ti-brand-facebook" style="color:#1877F2;font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">Facebook</div>
+                <div class="social-hint">Page or profile URL — shown in footer and share links</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">facebook.com/</span>
+                <input class="social-input" type="text" placeholder="CityqloByJerwin" id="sc-facebook">
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle on" id="sct-facebook" onclick="toggleSocial('facebook')" style="width:28px;height:16px;"></div>
+                <span class="social-live-lbl" id="scl-facebook">Live</span>
+              </div>
+            </div>
+
+            <!-- TikTok -->
+            <div class="social-card" data-platform="tiktok">
+              <div class="social-icon-wrap" style="background:rgba(0,0,0,0.07);border-color:rgba(0,0,0,0.12);">
+                <i class="ti ti-brand-tiktok" style="color:var(--ink-text);font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">TikTok</div>
+                <div class="social-hint">Your @handle — short videos drive condo buyer leads</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">tiktok.com/@</span>
+                <input class="social-input" type="text" placeholder="cityqlo" id="sc-tiktok">
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle on" id="sct-tiktok" onclick="toggleSocial('tiktok')" style="width:28px;height:16px;"></div>
+                <span class="social-live-lbl" id="scl-tiktok">Live</span>
+              </div>
+            </div>
+
+            <!-- Instagram -->
+            <div class="social-card" data-platform="instagram">
+              <div class="social-icon-wrap" style="background:rgba(225,48,108,0.08);border-color:rgba(225,48,108,0.2);">
+                <i class="ti ti-brand-instagram" style="color:#E1306C;font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">Instagram</div>
+                <div class="social-hint">@handle for property photos, reels, and stories</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">instagram.com/</span>
+                <input class="social-input" type="text" placeholder="cityqlo" id="sc-instagram">
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle on" id="sct-instagram" onclick="toggleSocial('instagram')" style="width:28px;height:16px;"></div>
+                <span class="social-live-lbl" id="scl-instagram">Live</span>
+              </div>
+            </div>
+
+            <!-- YouTube -->
+            <div class="social-card" data-platform="youtube">
+              <div class="social-icon-wrap" style="background:rgba(255,0,0,0.07);border-color:rgba(255,0,0,0.2);">
+                <i class="ti ti-brand-youtube" style="color:#FF0000;font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">YouTube</div>
+                <div class="social-hint">Channel for property tours and walkthroughs</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">youtube.com/@</span>
+                <input class="social-input" type="text" placeholder="cityqlo" id="sc-youtube">
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle" id="sct-youtube" onclick="toggleSocial('youtube')" style="width:28px;height:16px;background:var(--linen);"></div>
+                <span class="social-live-lbl" id="scl-youtube" style="color:var(--silver);">Off</span>
+              </div>
+            </div>
+
+            <!-- LinkedIn -->
+            <div class="social-card" data-platform="linkedin">
+              <div class="social-icon-wrap" style="background:rgba(10,102,194,0.08);border-color:rgba(10,102,194,0.2);">
+                <i class="ti ti-brand-linkedin" style="color:#0A66C2;font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">LinkedIn</div>
+                <div class="social-hint">Company or personal profile for professional credibility</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">linkedin.com/in/</span>
+                <input class="social-input" type="text" placeholder="jerwin-santos" id="sc-linkedin">
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle" id="sct-linkedin" onclick="toggleSocial('linkedin')" style="width:28px;height:16px;background:var(--linen);"></div>
+                <span class="social-live-lbl" id="scl-linkedin" style="color:var(--silver);">Off</span>
+              </div>
+            </div>
+
+            <!-- WhatsApp -->
+            <div class="social-card" data-platform="whatsapp">
+              <div class="social-icon-wrap" style="background:rgba(37,211,102,0.08);border-color:rgba(37,211,102,0.25);">
+                <i class="ti ti-brand-whatsapp" style="color:#25D366;font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">WhatsApp</div>
+                <div class="social-hint">Direct number — used for all wa.me links and CTAs across the site</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">wa.me/</span>
+                <input class="social-input" type="text" placeholder="639170000000" id="sc-whatsapp" value="639170000000">
+                <button onclick="window.open('https://wa.me/'+document.getElementById('sc-whatsapp').value,'_blank')" style="flex-shrink:0;padding:5px 9px;border:0.5px solid rgba(37,211,102,0.4);border-radius:2px;background:rgba(37,211,102,0.08);font-family:'Inter',sans-serif;font-size:9px;color:#25D366;cursor:pointer;font-weight:600;letter-spacing:0.08em;white-space:nowrap;">TEST LINK</button>
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle on" id="sct-whatsapp" onclick="toggleSocial('whatsapp')" style="width:28px;height:16px;"></div>
+                <span class="social-live-lbl" id="scl-whatsapp">Live</span>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="social-card" data-platform="email">
+              <div class="social-icon-wrap" style="background:rgba(35,90,144,0.08);border-color:rgba(35,90,144,0.22);">
+                <i class="ti ti-mail" style="color:var(--logo-blue);font-size:17px;"></i>
+              </div>
+              <div class="social-meta">
+                <div class="social-label">Email</div>
+                <div class="social-hint">Contact email — used in footer mailto link and inquiry forms</div>
+              </div>
+              <div class="social-input-wrap">
+                <span class="social-prefix">mailto:</span>
+                <input class="social-input" type="email" placeholder="jerwin@cityqlo.com" id="sc-email">
+              </div>
+              <div class="social-toggle-wrap">
+                <div class="unit-toggle on" id="sct-email" onclick="toggleSocial('email')" style="width:28px;height:16px;"></div>
+                <span class="social-live-lbl" id="scl-email">Live</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer placement note -->
+          <div style="margin-top:16px;background:var(--obsidian);border:1px solid var(--graphite);border-radius:3px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+            <i class="ti ti-info-circle" style="font-size:15px;color:var(--accent-gold);flex-shrink:0;margin-top:1px;"></i>
+            <div>
+              <div style="font-size:10.5px;font-weight:500;color:var(--white);margin-bottom:4px;">Where these links appear</div>
+              <div style="font-size:10px;color:var(--silver);line-height:1.7;">
+                <span style="color:var(--accent-gold);">Footer</span> — icon row at the bottom of every page &nbsp;·&nbsp;
+                <span style="color:var(--accent-gold);">Advisor Card</span> — below Jerwin's bio &nbsp;·&nbsp;
+                <span style="color:var(--accent-gold);">Quiz Results</span> — share CTA after match &nbsp;·&nbsp;
+                <span style="color:var(--accent-gold);">Insights</span> — article share buttons<br>
+                Toggle a platform <span style="color:var(--silver);">Off</span> to hide it everywhere at once without deleting the URL.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── WEBSITE SETTINGS ── -->
+      <div id="sec-settings" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div style="flex:1;overflow-y:auto;">
+
+          <!-- Settings Tab Bar -->
+          <div style="background:white;border-bottom:1px solid var(--linen);padding:0 18px;display:flex;gap:0;flex-shrink:0;overflow-x:auto;" id="settings-tabbar">
+            <div class="stab active" id="stab-general"   onclick="setSettingsTab('general')">  <i class="ti ti-adjustments-horizontal"></i> General</div>
+            <div class="stab"        id="stab-seo"       onclick="setSettingsTab('seo')">       <i class="ti ti-search"></i> SEO &amp; Meta</div>
+            <div class="stab"        id="stab-contact"   onclick="setSettingsTab('contact')">   <i class="ti ti-map-pin"></i> Contact</div>
+            <div class="stab"        id="stab-nav"       onclick="setSettingsTab('nav')">       <i class="ti ti-layout-navbar"></i> Navigation</div>
+            <div class="stab"        id="stab-footer"    onclick="setSettingsTab('footer')">    <i class="ti ti-layout-bottombar"></i> Footer</div>
+            <div class="stab"        id="stab-maint"     onclick="setSettingsTab('maint')">     <i class="ti ti-tools"></i> Maintenance</div>
+          </div>
+
+          <!-- ── GENERAL ── -->
+          <div id="st-general" class="settings-body">
+            <div class="settings-section-head">
+              <div>
+                <div class="settings-eyebrow">Website Settings · General</div>
+                <div class="settings-title">General</div>
+                <div class="settings-sub">Core identity — site name, logo, and brand basics.</div>
+              </div>
+              <button class="btn-primary" onclick="flashSave(this)"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-id-badge" style="color:var(--logo-blue)"></i> Site Identity</div>
+              <div class="pe-field-grid">
+                <div class="pe-field">
+                  <label class="pe-label">Site Name</label>
+                  <input class="pe-input" type="text" value="Cityqlo">
+                  <div class="pe-hint" style="margin-top:3px;">Shown in the browser tab and OG share cards.</div>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Tagline</label>
+                  <input class="pe-input" type="text" value="The Sovereign Sapphire Standard">
+                </div>
+                <div class="pe-field" style="grid-column:1/-1;">
+                  <label class="pe-label">Site URL <span class="pe-hint">(no trailing slash)</span></label>
+                  <input class="pe-input" type="url" value="https://cityqlo.com">
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-photo" style="color:var(--logo-blue)"></i> Logo &amp; Favicon</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <!-- Wordmark -->
+                <div>
+                  <div class="pe-label" style="margin-bottom:7px;">Wordmark (Main Logo)</div>
+                  <div class="logo-upload-box">
+                    <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px;color:var(--ink-text);letter-spacing:0.08em;">CITYQLO</div>
+                    <div style="font-size:8.5px;color:var(--silver);margin-top:5px;">wordmark.png · current</div>
+                  </div>
+                  <div class="upload-hint-row"><i class="ti ti-upload" style="font-size:10px;color:var(--logo-blue);"></i> <span>Replace · PNG / SVG · transparent bg</span></div>
+                </div>
+                <!-- Icon mark -->
+                <div>
+                  <div class="pe-label" style="margin-bottom:7px;">Icon Mark</div>
+                  <div class="logo-upload-box">
+                    <div class="logo-mark" style="width:38px;height:38px;font-size:16px;">CQ</div>
+                    <div style="font-size:8.5px;color:var(--silver);margin-top:5px;">logo.png · current</div>
+                  </div>
+                  <div class="upload-hint-row"><i class="ti ti-upload" style="font-size:10px;color:var(--logo-blue);"></i> <span>Replace · PNG / SVG · transparent bg</span></div>
+                </div>
+                <!-- Favicon -->
+                <div>
+                  <div class="pe-label" style="margin-bottom:7px;">Favicon</div>
+                  <div class="logo-upload-box">
+                    <div style="width:32px;height:32px;background:var(--logo-blue);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--accent-gold);">C</div>
+                    <div style="font-size:8.5px;color:var(--silver);margin-top:5px;">favicon.ico · current</div>
+                  </div>
+                  <div class="upload-hint-row"><i class="ti ti-upload" style="font-size:10px;color:var(--logo-blue);"></i> <span>ICO / PNG · 32×32 or 64×64</span></div>
+                </div>
+              </div>
+              <div style="margin-top:12px;padding:10px 12px;background:var(--pearl);border:0.5px solid var(--linen);border-radius:2px;font-size:9.5px;color:var(--ash);">
+                <i class="ti ti-info-circle" style="color:var(--logo-blue);font-size:11px;"></i> Per rule N-1 &amp; N-15: logo color is controlled via CSS class toggle (<code style="background:var(--bone);padding:1px 4px;border-radius:2px;">.logo--white</code> / <code style="background:var(--bone);padding:1px 4px;border-radius:2px;">.logo--brand</code>) — never by swapping the src.
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-palette" style="color:var(--logo-blue)"></i> Brand Color Check</div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+                <div class="color-swatch" style="--sw:#235A90;"><div class="sw-dot" style="background:#235A90;"></div><div class="sw-name">Logo Blue</div><div class="sw-hex">#235A90</div></div>
+                <div class="color-swatch" style="--sw:#D4A017;"><div class="sw-dot" style="background:#D4A017;"></div><div class="sw-name">Accent Gold</div><div class="sw-hex">#D4A017</div></div>
+                <div class="color-swatch" style="--sw:#14B8A6;"><div class="sw-dot" style="background:#14B8A6;"></div><div class="sw-name">Accent Teal</div><div class="sw-hex">#14B8A6</div></div>
+                <div class="color-swatch" style="--sw:#1A1C1E;"><div class="sw-dot" style="background:#1A1C1E;border:1px solid var(--graphite);"></div><div class="sw-name">Obsidian</div><div class="sw-hex">#1A1C1E</div></div>
+                <div class="color-swatch" style="--sw:#F3F5F8;"><div class="sw-dot" style="background:#F3F5F8;border:1px solid var(--linen);"></div><div class="sw-name">Pearl</div><div class="sw-hex">#F3F5F8</div></div>
+                <div class="color-swatch" style="--sw:#6B7280;"><div class="sw-dot" style="background:#6B7280;"></div><div class="sw-name">Ash</div><div class="sw-hex">#6B7280</div></div>
+              </div>
+              <div style="font-size:9px;color:var(--silver);margin-top:8px;">Token-locked — changes here update the CSS variables globally. Consult §TOKENS before modifying.</div>
+            </div>
+          </div>
+
+          <!-- ── SEO & META ── -->
+          <div id="st-seo" class="settings-body" style="display:none;">
+            <div class="settings-section-head">
+              <div>
+                <div class="settings-eyebrow">Website Settings · SEO</div>
+                <div class="settings-title">SEO &amp; Meta</div>
+                <div class="settings-sub">Control how Cityqlo appears in Google search results and when shared on social media.</div>
+              </div>
+              <button class="btn-primary" onclick="flashSave(this)"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-brand-google" style="color:var(--logo-blue)"></i> Google Search Appearance</div>
+              <div style="background:var(--pearl);border:0.5px solid var(--bone);border-radius:3px;padding:12px 14px;margin-bottom:14px;">
+                <div style="font-size:10px;color:var(--silver);margin-bottom:7px;letter-spacing:0.1em;text-transform:uppercase;">Preview</div>
+                <div style="font-size:14px;color:#1a0dab;font-family:Arial,sans-serif;">Cityqlo — DMCI Condos in Metro Manila</div>
+                <div style="font-size:10.5px;color:#006621;font-family:Arial,sans-serif;margin-top:1px;">cityqlo.com</div>
+                <div style="font-size:11px;color:#545454;font-family:Arial,sans-serif;margin-top:2px;line-height:1.4;">Discover premium DMCI condos across Pasig, Parañaque, Mandaluyong &amp; more. Expert guidance by Jerwin Santos — free consultation.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="pe-field">
+                  <label class="pe-label">Meta Title <span class="pe-hint">(recommended 50–60 chars)</span></label>
+                  <div style="position:relative;">
+                    <input class="pe-input" type="text" id="seo-title" value="Cityqlo — DMCI Condos in Metro Manila" oninput="updateSeoCount('seo-title','seo-title-count',60)">
+                    <span id="seo-title-count" class="char-count">38 / 60</span>
+                  </div>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Meta Description <span class="pe-hint">(recommended 150–160 chars)</span></label>
+                  <div style="position:relative;">
+                    <textarea class="pe-input" id="seo-desc" rows="3" style="resize:vertical;" oninput="updateSeoCount('seo-desc','seo-desc-count',160)">Discover premium DMCI condos across Pasig, Parañaque, Mandaluyong & more. Expert guidance by Jerwin Santos — free consultation.</textarea>
+                    <span id="seo-desc-count" class="char-count" style="bottom:8px;">127 / 160</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-share" style="color:var(--logo-blue)"></i> Open Graph (Social Share Cards)</div>
+              <div style="background:var(--obsidian);border-radius:3px;overflow:hidden;margin-bottom:14px;max-width:360px;">
+                <div style="height:80px;background:linear-gradient(135deg,var(--graphite),var(--charcoal));display:flex;align-items:center;justify-content:center;">
+                  <i class="ti ti-photo" style="font-size:22px;color:rgba(255,255,255,0.15);"></i>
+                </div>
+                <div style="padding:10px 12px;border-top:1px solid var(--graphite);">
+                  <div style="font-size:9px;color:var(--silver);text-transform:uppercase;letter-spacing:0.1em;">cityqlo.com</div>
+                  <div style="font-size:11.5px;font-weight:600;color:var(--white);margin-top:3px;">Cityqlo — DMCI Condos in Metro Manila</div>
+                  <div style="font-size:9.5px;color:var(--silver);margin-top:2px;line-height:1.4;">Discover premium DMCI condos. Expert guidance, free consultation.</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="pe-field">
+                  <label class="pe-label">OG Title</label>
+                  <input class="pe-input" type="text" value="Cityqlo — DMCI Condos in Metro Manila">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">OG Description</label>
+                  <input class="pe-input" type="text" value="Discover premium DMCI condos. Expert guidance, free consultation.">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">OG Image <span class="pe-hint">(1200×630px recommended)</span></label>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <input class="pe-input" type="url" placeholder="https://cityqlo.com/og-image.jpg" style="flex:1;">
+                    <button class="btn-ghost" style="flex-shrink:0;font-size:9px;padding:5px 10px;"><i class="ti ti-upload" style="font-size:10px;"></i> Upload</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-brand-google" style="color:var(--logo-blue)"></i> Analytics &amp; Tracking</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="pe-field">
+                  <label class="pe-label">Google Analytics ID <span class="pe-hint">(GA4)</span></label>
+                  <input class="pe-input" type="text" placeholder="G-XXXXXXXXXX">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Google Tag Manager ID</label>
+                  <input class="pe-input" type="text" placeholder="GTM-XXXXXXX">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Facebook Pixel ID</label>
+                  <input class="pe-input" type="text" placeholder="XXXXXXXXXXXXXXXX">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Google Search Console Verification</label>
+                  <input class="pe-input" type="text" placeholder="Meta tag content value">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CONTACT ── -->
+          <div id="st-contact" class="settings-body" style="display:none;">
+            <div class="settings-section-head">
+              <div>
+                <div class="settings-eyebrow">Website Settings · Contact</div>
+                <div class="settings-title">Contact &amp; Location</div>
+                <div class="settings-sub">Business details shown in the footer, contact section, and Google search results.</div>
+              </div>
+              <button class="btn-primary" onclick="flashSave(this)"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-map-pin" style="color:var(--logo-blue)"></i> Business Address</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="pe-field" style="grid-column:1/-1;">
+                  <label class="pe-label">Street Address</label>
+                  <input class="pe-input" type="text" placeholder="e.g. 123 Sapphire St, Kapitolyo">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">City</label>
+                  <input class="pe-input" type="text" placeholder="Pasig City">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Province / Region</label>
+                  <input class="pe-input" type="text" placeholder="Metro Manila">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">ZIP Code</label>
+                  <input class="pe-input" type="text" placeholder="1603">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Country</label>
+                  <input class="pe-input" type="text" value="Philippines">
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-clock" style="color:var(--logo-blue)"></i> Office Hours</div>
+              <div style="display:flex;flex-direction:column;gap:7px;" id="office-hours-list">
+                <div class="oh-row"><div class="oh-day">Monday – Friday</div><input class="pe-input oh-input" type="text" value="9:00 AM – 7:00 PM"><div class="oh-toggle"><div class="unit-toggle on" style="width:28px;height:16px;"></div><span style="font-size:9px;color:var(--accent-teal);">Open</span></div></div>
+                <div class="oh-row"><div class="oh-day">Saturday</div><input class="pe-input oh-input" type="text" value="9:00 AM – 5:00 PM"><div class="oh-toggle"><div class="unit-toggle on" style="width:28px;height:16px;"></div><span style="font-size:9px;color:var(--accent-teal);">Open</span></div></div>
+                <div class="oh-row"><div class="oh-day">Sunday</div><input class="pe-input oh-input" type="text" value="By appointment only"><div class="oh-toggle"><div class="unit-toggle" style="width:28px;height:16px;background:var(--linen);"></div><span style="font-size:9px;color:var(--silver);">Closed</span></div></div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-map" style="color:var(--logo-blue)"></i> Google Maps Embed</div>
+              <div class="pe-field" style="margin-bottom:10px;">
+                <label class="pe-label">Maps Embed URL <span class="pe-hint">(from Google Maps → Share → Embed)</span></label>
+                <input class="pe-input" type="url" placeholder="https://www.google.com/maps/embed?pb=…">
+              </div>
+              <div style="background:linear-gradient(135deg,var(--bone),var(--pearl));border-radius:3px;border:1px solid var(--linen);height:110px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <i class="ti ti-map-pin" style="font-size:18px;color:var(--linen);"></i>
+                <span style="font-size:10.5px;color:var(--silver);">Map preview will appear here once URL is set</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── NAVIGATION ── -->
+          <div id="st-nav" class="settings-body" style="display:none;">
+            <div class="settings-section-head">
+              <div>
+                <div class="settings-eyebrow">Website Settings · Navigation</div>
+                <div class="settings-title">Navigation</div>
+                <div class="settings-sub">Control which pages appear in the main nav and mobile bottom bar. Toggle off to hide without deleting.</div>
+              </div>
+              <button class="btn-primary" onclick="flashSave(this)"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-layout-navbar" style="color:var(--logo-blue)"></i> Desktop Navigation <span style="font-size:9px;color:var(--silver);font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px;">— drag to reorder</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="nav-item-row">
+                  <i class="ti ti-grip-vertical nav-grip"></i>
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <span class="nav-item-label">Home</span>
+                  <span class="nav-item-route">#/</span>
+                  <span class="nav-item-badge" style="background:rgba(20,184,166,0.1);color:var(--accent-teal);border-color:rgba(20,184,166,0.3);">Always On</span>
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-grip-vertical nav-grip"></i>
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <span class="nav-item-label">Condos</span>
+                  <span class="nav-item-route">#/catalog</span>
+                  <input class="pe-input" type="text" value="Condos" style="max-width:100px;padding:4px 8px;font-size:10px;">
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-grip-vertical nav-grip"></i>
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <span class="nav-item-label">Compare</span>
+                  <span class="nav-item-route">#/compare</span>
+                  <input class="pe-input" type="text" value="Compare" style="max-width:100px;padding:4px 8px;font-size:10px;">
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-grip-vertical nav-grip"></i>
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <span class="nav-item-label">Insights</span>
+                  <span class="nav-item-route">#/insights</span>
+                  <input class="pe-input" type="text" value="Insights" style="max-width:100px;padding:4px 8px;font-size:10px;">
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-grip-vertical nav-grip"></i>
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <span class="nav-item-label">Guides</span>
+                  <span class="nav-item-route">#/guides</span>
+                  <input class="pe-input" type="text" value="Guides" style="max-width:100px;padding:4px 8px;font-size:10px;">
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-grip-vertical nav-grip"></i>
+                  <input type="checkbox" style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <span class="nav-item-label" style="color:var(--silver);">Quiz</span>
+                  <span class="nav-item-route" style="opacity:0.5;">#/quiz</span>
+                  <input class="pe-input" type="text" value="Find My Condo" style="max-width:100px;padding:4px 8px;font-size:10px;opacity:0.5;">
+                  <span class="nav-item-badge" style="background:rgba(212,160,23,0.08);color:var(--accent-gold);border-color:rgba(212,160,23,0.3);">Rule N-6</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-layout-bottombar" style="color:var(--logo-blue)"></i> Mobile Bottom Nav <span style="font-size:9px;color:var(--silver);font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px;">— exactly 4 tabs per Rule §PRESERVE</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="nav-item-row">
+                  <i class="ti ti-home" style="font-size:13px;color:var(--logo-blue);flex-shrink:0;"></i>
+                  <span class="nav-item-label">Home</span>
+                  <span class="nav-item-route">#/</span>
+                  <span class="nav-item-badge" style="background:rgba(20,184,166,0.1);color:var(--accent-teal);border-color:rgba(20,184,166,0.3);">Fixed</span>
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-building-skyscraper" style="font-size:13px;color:var(--logo-blue);flex-shrink:0;"></i>
+                  <span class="nav-item-label">Condos</span>
+                  <span class="nav-item-route">#/catalog</span>
+                  <span class="nav-item-badge" style="background:rgba(20,184,166,0.1);color:var(--accent-teal);border-color:rgba(20,184,166,0.3);">Fixed</span>
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-brand-whatsapp" style="font-size:13px;color:#25D366;flex-shrink:0;"></i>
+                  <span class="nav-item-label">Consult</span>
+                  <span class="nav-item-route" style="color:#25D366;">wa.me/639170000000</span>
+                  <span class="nav-item-badge" style="background:rgba(20,184,166,0.1);color:var(--accent-teal);border-color:rgba(20,184,166,0.3);">Fixed · Rule N-8</span>
+                </div>
+                <div class="nav-item-row">
+                  <i class="ti ti-article" style="font-size:13px;color:var(--logo-blue);flex-shrink:0;"></i>
+                  <span class="nav-item-label">Insights</span>
+                  <span class="nav-item-route">#/insights</span>
+                  <span class="nav-item-badge" style="background:rgba(20,184,166,0.1);color:var(--accent-teal);border-color:rgba(20,184,166,0.3);">Fixed</span>
+                </div>
+              </div>
+              <div style="margin-top:10px;padding:9px 12px;background:var(--pearl);border:0.5px solid var(--bone);border-radius:2px;font-size:9.5px;color:var(--ash);">
+                <i class="ti ti-lock" style="color:var(--accent-gold);font-size:11px;"></i> Mobile bottom nav is locked to these 4 tabs per §PRESERVE. The Consult tab must always open WhatsApp externally (Rule N-8).
+              </div>
+            </div>
+          </div>
+
+          <!-- ── FOOTER ── -->
+          <div id="st-footer" class="settings-body" style="display:none;">
+            <div class="settings-section-head">
+              <div>
+                <div class="settings-eyebrow">Website Settings · Footer</div>
+                <div class="settings-title">Footer</div>
+                <div class="settings-sub">Manage the text, links, and legal copy shown at the bottom of every page.</div>
+              </div>
+              <button class="btn-primary" onclick="flashSave(this)"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-text-size" style="color:var(--logo-blue)"></i> Footer Copy</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="pe-field">
+                  <label class="pe-label">Footer Tagline</label>
+                  <input class="pe-input" type="text" value="The Sovereign Sapphire Standard">
+                  <div style="font-size:9px;color:var(--silver);margin-top:3px;">Appears in Cormorant Garamond italic below the wordmark in the footer.</div>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Accreditation Line</label>
+                  <input class="pe-input" type="text" value="DMCI Homes Accredited Property Advisor">
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Copyright Text</label>
+                  <input class="pe-input" type="text" value="© 2025 Cityqlo. All rights reserved.">
+                  <div style="font-size:9px;color:var(--silver);margin-top:3px;">Year is auto-updated each January 1.</div>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Disclaimer / Legal Note <span class="pe-hint">(optional · shown in small print)</span></label>
+                  <textarea class="pe-input" rows="2" style="resize:vertical;">Property prices and availability are subject to change without prior notice. All information is for reference only.</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-link" style="color:var(--logo-blue)"></i> Footer Quick Links</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="nav-item-row">
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <input class="pe-input" type="text" value="Privacy Policy" style="flex:1;padding:5px 8px;font-size:10.5px;">
+                  <input class="pe-input" type="url" value="#/privacy" style="flex:1;padding:5px 8px;font-size:10.5px;">
+                </div>
+                <div class="nav-item-row">
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <input class="pe-input" type="text" value="Terms of Use" style="flex:1;padding:5px 8px;font-size:10.5px;">
+                  <input class="pe-input" type="url" value="#/terms" style="flex:1;padding:5px 8px;font-size:10.5px;">
+                </div>
+                <div class="nav-item-row">
+                  <input type="checkbox" checked style="accent-color:var(--logo-blue);flex-shrink:0;">
+                  <input class="pe-input" type="text" value="Sitemap" style="flex:1;padding:5px 8px;font-size:10.5px;">
+                  <input class="pe-input" type="url" value="/sitemap.xml" style="flex:1;padding:5px 8px;font-size:10.5px;">
+                </div>
+                <button style="display:flex;align-items:center;gap:5px;width:100%;padding:7px;border:1.5px dashed var(--linen);background:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:10px;color:var(--ash);border-radius:2px;justify-content:center;transition:all 180ms;" onmouseover="this.style.borderColor='var(--logo-blue)';this.style.color='var(--logo-blue)'" onmouseout="this.style.borderColor='var(--linen)';this.style.color='var(--ash)'"><i class="ti ti-plus"></i> Add Link</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── MAINTENANCE ── -->
+          <div id="st-maint" class="settings-body" style="display:none;">
+            <div class="settings-section-head">
+              <div>
+                <div class="settings-eyebrow">Website Settings · Maintenance</div>
+                <div class="settings-title">Maintenance Mode</div>
+                <div class="settings-sub">Take the site offline for visitors while you make updates. You can still access the admin.</div>
+              </div>
+              <button class="btn-primary" onclick="flashSave(this)"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+            </div>
+
+            <!-- Master toggle -->
+            <div class="settings-card" style="border:1px solid var(--linen);" id="maint-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--ink-text);margin-bottom:3px;">Maintenance Mode</div>
+                  <div style="font-size:10.5px;color:var(--silver);line-height:1.5;">When enabled, all visitors see your custom message instead of the site. The admin panel remains accessible.</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                  <div class="unit-toggle" id="maint-toggle" onclick="toggleMaint()" style="width:40px;height:22px;background:var(--linen);"></div>
+                  <span id="maint-status-lbl" style="font-size:10px;color:var(--silver);font-weight:500;min-width:28px;">Off</span>
+                </div>
+              </div>
+              <div id="maint-warning" style="display:none;margin-top:12px;padding:10px 12px;background:rgba(212,160,23,0.08);border:1px solid rgba(212,160,23,0.35);border-radius:2px;display:none;align-items:center;gap:8px;">
+                <i class="ti ti-alert-triangle" style="font-size:14px;color:var(--accent-gold);flex-shrink:0;"></i>
+                <span style="font-size:10.5px;color:var(--accent-gold);">Maintenance mode is <strong>active</strong> — visitors cannot see the site right now.</span>
+              </div>
+            </div>
+
+            <div class="settings-card" id="maint-fields">
+              <div class="settings-card-head"><i class="ti ti-message" style="color:var(--logo-blue)"></i> Visitor Message</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="pe-field">
+                  <label class="pe-label">Headline</label>
+                  <input class="pe-input" type="text" value="We'll be back shortly." style="font-family:'Cormorant Garamond',serif;font-size:15px;">
+                  <div style="font-size:9px;color:var(--silver);margin-top:3px;">Renders in Cormorant Garamond italic on the maintenance page.</div>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Sub-message</label>
+                  <textarea class="pe-input" rows="2" style="resize:vertical;">We're making some improvements. Jerwin is still reachable on WhatsApp.</textarea>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">WhatsApp CTA During Maintenance</label>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="maint-wa" checked style="accent-color:var(--logo-blue);">
+                    <label for="maint-wa" style="font-size:11px;color:var(--ash);cursor:pointer;">Show WhatsApp button so buyers can still reach Jerwin</label>
+                  </div>
+                </div>
+                <div class="pe-field">
+                  <label class="pe-label">Expected Back Online</label>
+                  <input class="pe-input" type="text" placeholder="e.g. Tomorrow, 9 AM — or leave blank">
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-head"><i class="ti ti-lock" style="color:var(--logo-blue)"></i> Admin Access During Maintenance</div>
+              <div style="font-size:10.5px;color:var(--ash);line-height:1.7;">
+                This admin panel is always accessible regardless of maintenance mode.<br>
+                <span style="color:var(--silver);">Tip: Bookmark <strong style="color:var(--ink-text);">cityqlo.com/admin</strong> for direct access at any time.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── PORTFOLIO ── -->
+      <div id="sec-portfolio" style="display:none;flex:1;">
+        <div class="view-pad">
+          <div class="vt">Featured Portfolio</div>
+          <table class="dtable">
+            <thead><tr><th>Project</th><th>Location</th><th>Status</th><th>Order</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div style="font-size:12px;font-weight:500;">Arista Place</div><div style="font-size:10px;color:var(--silver);">Best for OFWs</div></td><td style="color:var(--ash);font-size:11px;">Parañaque</td><td><span class="sl">RFO</span></td><td style="font-size:11px;color:var(--ash);">#1</td><td><span class="al">Reorder</span><span class="asep">·</span><span class="al">Edit</span></td></tr>
+              <tr><td><div style="font-size:12px;font-weight:500;">Kai Garden</div><div style="font-size:10px;color:var(--silver);">Best value</div></td><td style="color:var(--ash);font-size:11px;">Mandaluyong</td><td><span class="pill pill-blue">Pre-Selling</span></td><td style="font-size:11px;color:var(--ash);">#2</td><td><span class="al">Reorder</span><span class="asep">·</span><span class="al">Edit</span></td></tr>
+              <tr><td><div style="font-size:12px;font-weight:500;">Lumiere Residences</div><div style="font-size:10px;color:var(--silver);">Premium · River view</div></td><td style="color:var(--ash);font-size:11px;">Pasig</td><td><span class="sl">RFO</span></td><td style="font-size:11px;color:var(--ash);">#3</td><td><span class="al">Reorder</span><span class="asep">·</span><span class="al">Edit</span></td></tr>
+              <tr><td><div style="font-size:12px;font-weight:500;">Magnolia Place</div><div style="font-size:10px;color:var(--silver);">QC value play</div></td><td style="color:var(--ash);font-size:11px;">Quezon City</td><td><span class="pill pill-blue">Pre-Selling</span></td><td style="font-size:11px;color:var(--ash);">#4</td><td><span class="al">Reorder</span><span class="asep">·</span><span class="al">Edit</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const data = [
+  { loc:'Parañaque', projects:[
+    { id:'arista',  name:'Arista Place',     status:'rfo', sub:'RFO · Studio / 1BR / 2BR · From ₱3.2M', counts:{photo:12,video:3,'360':2,blueprint:4,amenities:8} },
+  ]},
+  { loc:'Mandaluyong', projects:[
+    { id:'kai',     name:'Kai Garden Residences', status:'pre', sub:'Pre-Selling · 1BR / 2BR · From ₱4.8M', counts:{photo:8,video:2,'360':1,blueprint:3,amenities:6} },
+  ]},
+  { loc:'Pasig', projects:[
+    { id:'lumiere', name:'Lumiere Residences', status:'rfo', sub:'RFO · Studio–3BR · From ₱5.5M', counts:{photo:15,video:4,'360':3,blueprint:5,amenities:10} },
+    { id:'levina',  name:'Levina Place',       status:'pre', sub:'Pre-Selling · 2BR / 3BR · From ₱6.2M', counts:{photo:7,video:1,'360':1,blueprint:4,amenities:6} },
+  ]},
+  { loc:'Quezon City', projects:[
+    { id:'magnolia',name:'Magnolia Place',    status:'pre', sub:'Pre-Selling · 1BR / 2BR · From ₱3.8M', counts:{photo:6,video:1,'360':0,blueprint:2,amenities:5} },
+  ]},
+  { loc:'Las Piñas', projects:[
+    { id:'cherry',  name:'Cherry Residences', status:'rfo', sub:'RFO · 1BR / 2BR · From ₱3.1M', counts:{photo:9,video:2,'360':2,blueprint:3,amenities:7} },
+  ]},
+];
+
+let openLocs = new Set(['Parañaque']);
+let activeProj = null;
+let activeTab = 'photo';
+
+function renderTree() {
+  const container = document.getElementById('tree-body');
+  container.innerHTML = data.map(loc => {
+    const isOpen = openLocs.has(loc.loc);
+    return `
+      <div class="loc-row ${isOpen?'open':''}" onclick="toggleLoc('${loc.loc}')">
+        <i class="ti ti-chevron-right loc-chevron" aria-hidden="true"></i>
+        <i class="ti ti-map-pin loc-pin" aria-hidden="true"></i>
+        <span class="loc-name">${loc.loc}</span>
+        <span class="loc-count">${loc.projects.length}</span>
+      </div>
+      <div class="proj-group ${isOpen?'open':''}">
+        ${loc.projects.map(p => `
+          <div class="proj-row ${activeProj&&activeProj.id===p.id?'active':''}" onclick="selectProj('${loc.loc}','${p.id}')">
+            <div class="proj-dot"></div>
+            <span class="proj-name">${p.name}</span>
+            ${p.status==='rfo'?'<span class="pill pill-teal">RFO</span>':'<span class="pill pill-blue">Pre</span>'}
+          </div>
+        `).join('')}
+        <div class="proj-row" style="opacity:0.6;" onclick="sendPrompt('How do I add a new project under ${loc.loc} in Cityqlo admin?')">
+          <i class="ti ti-plus" style="font-size:11px;color:var(--silver);margin-left:-2px" aria-hidden="true"></i>
+          <span class="proj-name" style="font-size:10.5px;">Add project</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleLoc(loc) {
+  if(openLocs.has(loc)) openLocs.delete(loc);
+  else openLocs.add(loc);
+  renderTree();
+}
+
+function selectProj(locName, projId) {
+  const loc = data.find(l=>l.loc===locName);
+  const proj = loc.projects.find(p=>p.id===projId);
+  activeProj = proj;
+
+  document.getElementById('empty-state').style.display = 'none';
+  const pd = document.getElementById('proj-detail');
+  pd.style.display = 'flex';
+  pd.style.flexDirection = 'column';
+  pd.style.overflow = 'hidden';
+  pd.style.flex = '1';
+
+  document.getElementById('d-eyebrow').textContent = `DMCI Homes · ${locName}`;
+  document.getElementById('d-title').textContent = proj.name;
+  document.getElementById('d-sub').textContent = proj.sub;
+
+  // update counts
+  Object.entries(proj.counts).forEach(([k,v])=>{
+    const el = document.getElementById('tc-'+k);
+    if(el) el.textContent = v;
+  });
+
+  // breadcrumb
+  document.getElementById('bcs1').style.display='';
+  document.getElementById('bc2').style.display='';
+  document.getElementById('bcs2').style.display='';
+  document.getElementById('bc3').style.display='';
+  document.getElementById('bc2').textContent = locName;
+  document.getElementById('bc3').textContent = proj.name;
+  document.getElementById('add-lbl').textContent = 'Add Photo';
+
+  renderTree();
+  setTab('photo');
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  ['photo','video','360','blueprint','amenities'].forEach(t=>{
+    document.getElementById('mb-'+t).style.display = (t===tab)?'grid':'none';
+    const mt = document.getElementById('mt-'+t);
+    mt.classList.toggle('active', t===tab);
+    mt.setAttribute('aria-selected', t===tab?'true':'false');
+  });
+  const adds = {photo:'Add Photo',video:'Add Video','360':'Add 360° Tour',blueprint:'Add Blueprint',amenities:'Add Amenity'};
+  document.getElementById('add-lbl').textContent = adds[tab]||'Add';
+  document.getElementById('bc3').textContent = activeProj ? activeProj.name : '';
+}
+
+function switchSection(el, sec) {
+  document.querySelectorAll('.s-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sec-catalog').style.display       = sec==='catalog'?'flex':'none';
+  document.getElementById('sec-portfolio').style.display     = sec==='portfolio'?'flex':'none';
+  document.getElementById('sec-hero').style.display          = sec==='hero'?'flex':'none';
+  document.getElementById('sec-propdetails').style.display   = sec==='propdetails'?'flex':'none';
+  document.getElementById('sec-catalog-mgr').style.display   = sec==='catalog-mgr'?'flex':'none';
+  document.getElementById('sec-compare').style.display       = sec==='compare'?'flex':'none';
+  document.getElementById('sec-advisor').style.display       = sec==='advisor'?'flex':'none';
+  document.getElementById('sec-socials').style.display       = sec==='socials'?'flex':'none';
+  document.getElementById('sec-settings').style.display      = sec==='settings'?'flex':'none';
+  const labels = {catalog:'Locations & Projects', portfolio:'Featured Portfolio', hero:'Hero Section', propdetails:'Property Details', 'catalog-mgr':'Catalog Manager', compare:'Compare Section', advisor:'Advisor', socials:'Social Media Links', settings:'Website Settings'};
+  document.getElementById('bc1').textContent = labels[sec] || sec;
+  ['bcs1','bc2','bcs2','bc3'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display='none'; });
+  const addLabels = {portfolio:'Feature Project', hero:'Upload Hero Media', propdetails:'Add Property', 'catalog-mgr':'Add Entry', compare:'Save Compare', advisor:'Save Advisor', socials:'Save Links', settings:'Save Settings'};
+  document.getElementById('add-lbl').textContent = addLabels[sec] || (sec==='catalog'?'Add Location':'Add');
+  if(sec==='propdetails') renderPropList();
+  if(sec==='catalog-mgr') renderCatalog();
+}
+
+// ── PROPERTY EDITOR DATA ──────────────────────────────────────────────────
+const propData = [
+  { id:'arista',   name:'Arista Place',         loc:'Parañaque',  status:'rfo',
+    teaser:'Best for OFWs — resort living near NAIA.',
+    overview:'Arista Place is a resort-inspired community in Parañaque offering premium resort amenities at accessible price points. Ideal for OFWs looking for a low-maintenance home near the airport.',
+    priceFrom:'3,200,000', priceTo:'6,500,000', dp:'0% DP · In-house', resort:'4.7',
+    units:'1,456 units', towers:'3 towers', floors:'18 floors', rfoDate:'Ready', lot:'2.1 hectares', parking:'yes',
+    unitTypes:[
+      {type:'Studio', enabled:true, sqm:'24–28', priceFrom:'3,200,000'},
+      {type:'1 Bedroom', enabled:true, sqm:'36–42', priceFrom:'4,100,000'},
+      {type:'2 Bedroom', enabled:true, sqm:'56–68', priceFrom:'5,400,000'},
+      {type:'3 Bedroom', enabled:false, sqm:'', priceFrom:''},
+    ],
+    amenities:['Lap Pool','Kiddie Pool','Fitness Gym','Clubhouse','Basketball Court','Playground','Function Hall','24/7 Security'],
+    pros:['Near NAIA — ideal for OFWs','0% down payment available','Resort-grade pool deck'],
+    cons:['Older towers may need renovation','Limited 3BR supply'],
+    quizTags:['ofw','rfo','budget-3to5','studio','1br','2br','amenities','pasig-paranaque'],
+  },
+  { id:'kai',      name:'Kai Garden Residences', loc:'Mandaluyong', status:'pre',
+    teaser:'Best value in Mandaluyong — garden living near Ortigas.',
+    overview:'Kai Garden Residences brings lush garden-themed living to the heart of Mandaluyong. Close to the Ortigas CBD and major shopping centers, ideal for young professionals and couples.',
+    priceFrom:'4,800,000', priceTo:'9,200,000', dp:'10% DP · Bank loan', resort:'4.5',
+    units:'984 units', towers:'2 towers', floors:'22 floors', rfoDate:'Q2 2027', lot:'1.4 hectares', parking:'limited',
+    unitTypes:[
+      {type:'Studio', enabled:false, sqm:'', priceFrom:''},
+      {type:'1 Bedroom', enabled:true, sqm:'38–46', priceFrom:'4,800,000'},
+      {type:'2 Bedroom', enabled:true, sqm:'60–72', priceFrom:'6,900,000'},
+      {type:'3 Bedroom', enabled:false, sqm:'', priceFrom:''},
+    ],
+    amenities:['Lap Pool','Fitness Gym','Clubhouse','Jogging Path','Garden Lounge','24/7 Security'],
+    pros:['Garden-themed design — rare in Metro Manila','Walking distance to Ortigas CBD'],
+    cons:['Pre-selling — 2027 turnover','No studio units'],
+    quizTags:['pre-selling','budget-5to8','1br','2br','mandaluyong','lifestyle-offices'],
+  },
+  { id:'lumiere',  name:'Lumiere Residences',    loc:'Pasig',       status:'rfo',
+    teaser:'Premium river-view living in the heart of Pasig.',
+    overview:'Lumiere Residences stands as one of DMCI\'s flagship communities in Pasig, offering sweeping river views, premium amenities, and proximity to Kapitolyo\'s thriving dining and business district.',
+    priceFrom:'5,500,000', priceTo:'14,000,000', dp:'0% DP · In-house / Bank', resort:'4.9',
+    units:'2,108 units', towers:'4 towers', floors:'28 floors', rfoDate:'Ready', lot:'3.2 hectares', parking:'yes',
+    unitTypes:[
+      {type:'Studio', enabled:true, sqm:'26–30', priceFrom:'5,500,000'},
+      {type:'1 Bedroom', enabled:true, sqm:'40–50', priceFrom:'6,800,000'},
+      {type:'2 Bedroom', enabled:true, sqm:'62–80', priceFrom:'9,000,000'},
+      {type:'3 Bedroom', enabled:true, sqm:'92–110', priceFrom:'12,000,000'},
+    ],
+    amenities:['Olympic Lap Pool','Kiddie Pool','Fitness Gym','Basketball Court','Tennis Court','Clubhouse','Function Hall','Jogging Path','Playground','24/7 Security','CCTV'],
+    pros:['River view units available','Mature community — all amenities ready','4 bedroom configurations'],
+    cons:['Higher price floor vs competitors','Some older units need refresh'],
+    quizTags:['rfo','budget-5to12','studio','1br','2br','3br','pasig','amenities','ofw','investment'],
+  },
+  { id:'levina',   name:'Levina Place',           loc:'Pasig',       status:'pre',
+    teaser:'Pre-selling 2BR/3BR gem in Pasig — growing family pick.',
+    overview:'Levina Place caters to growing families seeking spacious units in Pasig. Pre-selling now with competitive in-house financing options, it is well-positioned near top schools and Ortigas.',
+    priceFrom:'6,200,000', priceTo:'12,500,000', dp:'5% DP · In-house / Bank', resort:'4.6',
+    units:'756 units', towers:'2 towers', floors:'24 floors', rfoDate:'Q1 2028', lot:'1.8 hectares', parking:'yes',
+    unitTypes:[
+      {type:'Studio', enabled:false, sqm:'', priceFrom:''},
+      {type:'1 Bedroom', enabled:false, sqm:'', priceFrom:''},
+      {type:'2 Bedroom', enabled:true, sqm:'65–78', priceFrom:'6,200,000'},
+      {type:'3 Bedroom', enabled:true, sqm:'88–112', priceFrom:'9,500,000'},
+    ],
+    amenities:['Lap Pool','Fitness Gym','Clubhouse','Playground','Basketball Court','Function Hall','24/7 Security'],
+    pros:['Large 2BR and 3BR only — family-focused','Near top Pasig schools'],
+    cons:['Pre-selling — 2028 turnover','No studio / 1BR for investors'],
+    quizTags:['pre-selling','budget-5to12','2br','3br','pasig','lifestyle-schools','family'],
+  },
+  { id:'magnolia', name:'Magnolia Place',          loc:'Quezon City', status:'pre',
+    teaser:'QC value play — near Cubao and Quezon Ave.',
+    overview:'Magnolia Place is Cityqlo\'s top recommendation for buyers seeking value in Quezon City. Strategic location near LRT and major commercial hubs makes it a strong rental-yield candidate.',
+    priceFrom:'3,800,000', priceTo:'7,500,000', dp:'0% DP · In-house', resort:'4.4',
+    units:'1,122 units', towers:'3 towers', floors:'20 floors', rfoDate:'Q3 2027', lot:'2.0 hectares', parking:'limited',
+    unitTypes:[
+      {type:'Studio', enabled:false, sqm:'', priceFrom:''},
+      {type:'1 Bedroom', enabled:true, sqm:'38–44', priceFrom:'3,800,000'},
+      {type:'2 Bedroom', enabled:true, sqm:'58–70', priceFrom:'5,500,000'},
+      {type:'3 Bedroom', enabled:false, sqm:'', priceFrom:''},
+    ],
+    amenities:['Lap Pool','Fitness Gym','Clubhouse','Jogging Path','Playground','24/7 Security'],
+    pros:['Strong rental demand from QC professionals','Near LRT / MRT stations'],
+    cons:['Limited parking slots','No studio for small-budget investors'],
+    quizTags:['pre-selling','budget-3to5','budget-5to8','1br','2br','quezon-city','investment','lifestyle-offices'],
+  },
+  { id:'cherry',   name:'Cherry Residences',       loc:'Las Piñas',   status:'rfo',
+    teaser:'Affordable RFO in Las Piñas — most accessible entry price.',
+    overview:'Cherry Residences delivers DMCI quality at the most accessible price point in the portfolio. Perfect for first-time buyers and OFWs seeking a ready home in Las Piñas near Alabang.',
+    priceFrom:'3,100,000', priceTo:'5,800,000', dp:'0% DP · In-house', resort:'4.3',
+    units:'868 units', towers:'2 towers', floors:'16 floors', rfoDate:'Ready', lot:'1.5 hectares', parking:'yes',
+    unitTypes:[
+      {type:'Studio', enabled:false, sqm:'', priceFrom:''},
+      {type:'1 Bedroom', enabled:true, sqm:'34–40', priceFrom:'3,100,000'},
+      {type:'2 Bedroom', enabled:true, sqm:'52–64', priceFrom:'4,500,000'},
+      {type:'3 Bedroom', enabled:false, sqm:'', priceFrom:''},
+    ],
+    amenities:['Lap Pool','Fitness Gym','Clubhouse','Basketball Court','Playground','24/7 Security'],
+    pros:['Lowest starting price in portfolio','RFO — move in immediately'],
+    cons:['Smaller lot area — fewer amenities','Limited public transit nearby'],
+    quizTags:['rfo','budget-3to5','1br','2br','ofw','first-time-buyer'],
+  },
+];
+
+const allQuizTags = [
+  {key:'rfo',label:'RFO Ready'},{key:'pre-selling',label:'Pre-Selling'},
+  {key:'ofw',label:'OFW Friendly'},{key:'investment',label:'Investment'},
+  {key:'family',label:'Family'},{key:'first-time-buyer',label:'First-Time Buyer'},
+  {key:'studio',label:'Studio'},{key:'1br',label:'1BR'},{key:'2br',label:'2BR'},{key:'3br',label:'3BR'},
+  {key:'budget-3to5',label:'₱3M–5M'},{key:'budget-5to8',label:'₱5M–8M'},{key:'budget-5to12',label:'₱5M–12M'},
+  {key:'pasig',label:'Pasig'},{key:'pasig-paranaque',label:'Parañaque'},{key:'quezon-city',label:'Quezon City'},
+  {key:'mandaluyong',label:'Mandaluyong'},
+  {key:'amenities',label:'Resort Amenities'},{key:'lifestyle-offices',label:'Near Offices'},{key:'lifestyle-schools',label:'Near Schools'},
+];
+
+const allAmenities = [
+  'Lap Pool','Kiddie Pool','Olympic Lap Pool','Fitness Gym','Basketball Court','Tennis Court',
+  'Jogging Path','Clubhouse','Function Hall','Playground','Garden Lounge','24/7 Security','CCTV'
+];
+
+let activePropId = null;
+
+function renderPropList(filter='') {
+  const body = document.getElementById('prop-list-body');
+  const q = filter.toLowerCase();
+  body.innerHTML = propData.filter(p => p.name.toLowerCase().includes(q) || p.loc.toLowerCase().includes(q))
+    .map(p => `
+      <div class="prop-list-row ${activePropId===p.id?'active':''}" onclick="openPropEditor('${p.id}')">
+        <div class="prop-list-dot ${p.status==='rfo'?'dot-rfo':'dot-pre'}"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="prop-list-name">${p.name}</div>
+          <div style="font-size:9px;color:var(--silver);margin-top:1px;">${p.loc}</div>
+        </div>
+        <span class="${p.status==='rfo'?'pill pill-teal':'pill pill-blue'}" style="font-size:7.5px;">${p.status==='rfo'?'RFO':'Pre'}</span>
+      </div>
+    `).join('');
+}
+
+function filterPropList(val) { renderPropList(val); }
+
+function openPropEditor(id) {
+  activePropId = id;
+  const p = propData.find(x=>x.id===id);
+  renderPropList();
+
+  document.getElementById('prop-editor-empty').style.display = 'none';
+  const editor = document.getElementById('prop-editor');
+  editor.style.display = 'block';
+
+  // top bar
+  const badge = document.getElementById('pe-status-badge');
+  badge.textContent = p.status==='rfo'?'RFO':'Pre-Selling';
+  badge.className = p.status==='rfo' ? 'sl' : 'pill pill-blue';
+  document.getElementById('pe-title-bar').textContent = p.name;
+
+  // basic info
+  document.getElementById('pf-name').value = p.name;
+  document.getElementById('pf-dev').value = 'DMCI Homes';
+  document.getElementById('pf-location').value = p.loc;
+  document.getElementById('pf-status').value = p.status;
+  document.getElementById('pf-teaser').value = p.teaser;
+  document.getElementById('pf-overview').value = p.overview;
+
+  // pricing
+  document.getElementById('pf-price-from').value = p.priceFrom;
+  document.getElementById('pf-price-to').value = p.priceTo;
+  document.getElementById('pf-dp').value = p.dp;
+  document.getElementById('pf-resort').value = p.resort;
+
+  // specs
+  document.getElementById('pf-units').value = p.units;
+  document.getElementById('pf-towers').value = p.towers;
+  document.getElementById('pf-floors').value = p.floors;
+  document.getElementById('pf-rfo-date').value = p.rfoDate;
+  document.getElementById('pf-lot').value = p.lot;
+  document.getElementById('pf-parking').value = p.parking;
+
+  // unit types
+  renderUnitTypes(p.unitTypes);
+
+  // amenities
+  renderAmenitiesChecklist(p.amenities);
+
+  // pros & cons
+  renderProsCons(p.pros, 'pros-list', 'pro');
+  renderProsCons(p.cons, 'cons-list', 'con');
+
+  // quiz tags
+  renderQuizTags(p.quizTags);
+
+  // open first section by default
+  document.querySelectorAll('.pe-section').forEach((s,i) => {
+    if(i===0) s.classList.add('open'); else s.classList.remove('open');
+  });
+}
+
+function togglePeSection(head) {
+  const sec = head.closest('.pe-section');
+  sec.classList.toggle('open');
+}
+
+function renderUnitTypes(types) {
+  const c = document.getElementById('unit-types-container');
+  c.innerHTML = types.map((u,i) => `
+    <div class="unit-row ${u.enabled?'':'disabled'}" id="urow-${i}">
+      <div class="unit-toggle ${u.enabled?'on':''}" onclick="toggleUnit(${i})" title="${u.enabled?'Disable':'Enable'} this unit type"></div>
+      <span class="unit-label">${u.type}</span>
+      <div class="pe-field" style="margin:0;">
+        <label class="pe-label" style="font-size:7.5px;">Size (sqm)</label>
+        <input class="pe-input" style="font-size:10px;padding:4px 7px;" value="${u.sqm}" placeholder="e.g. 36–42" ${u.enabled?'':'disabled'}>
+      </div>
+      <div class="pe-field" style="margin:0;">
+        <label class="pe-label" style="font-size:7.5px;">Starting ₱</label>
+        <input class="pe-input" style="font-size:10px;padding:4px 7px;" value="${u.priceFrom}" placeholder="e.g. 4,100,000" ${u.enabled?'':'disabled'}>
+      </div>
+      <span style="font-size:9px;color:${u.enabled?'var(--accent-teal)':'var(--linen)'};">${u.enabled?'✓':'—'}</span>
+    </div>
+  `).join('');
+}
+
+function toggleUnit(i) {
+  const p = propData.find(x=>x.id===activePropId);
+  p.unitTypes[i].enabled = !p.unitTypes[i].enabled;
+  renderUnitTypes(p.unitTypes);
+}
+
+function addUnitType() {
+  const p = propData.find(x=>x.id===activePropId);
+  p.unitTypes.push({type:'New Type', enabled:true, sqm:'', priceFrom:''});
+  renderUnitTypes(p.unitTypes);
+}
+
+function renderAmenitiesChecklist(active) {
+  const c = document.getElementById('amenities-checklist');
+  c.innerHTML = allAmenities.map(a => {
+    const on = active.includes(a);
+    return `<label class="amenity-check ${on?'checked':''}" onclick="toggleAmenity(this,'${a}')">
+      <input type="checkbox" ${on?'checked':''} style="display:none;">
+      <i class="ti ${on?'ti-check':'ti-plus'}" style="font-size:10px;color:${on?'var(--logo-blue)':'var(--linen)'};" aria-hidden="true"></i>
+      <span>${a}</span>
+    </label>`;
+  }).join('');
+}
+
+function toggleAmenity(el, name) {
+  const p = propData.find(x=>x.id===activePropId);
+  const idx = p.amenities.indexOf(name);
+  if(idx>-1) p.amenities.splice(idx,1); else p.amenities.push(name);
+  renderAmenitiesChecklist(p.amenities);
+}
+
+function renderProsCons(list, containerId, type) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = list.map((item,i) => `
+    <div class="procon-row">
+      <input type="text" value="${item}" oninput="updateProCon('${type}',${i},this.value)">
+      <button class="procon-del" onclick="removeProCon('${type}',${i})" title="Remove"><i class="ti ti-x"></i></button>
+    </div>
+  `).join('');
+}
+
+function updateProCon(type,i,val) {
+  const p = propData.find(x=>x.id===activePropId);
+  if(type==='pro') p.pros[i]=val; else p.cons[i]=val;
+}
+
+function addProCon(type) {
+  const p = propData.find(x=>x.id===activePropId);
+  if(type==='pro') { p.pros.push(''); renderProsCons(p.pros,'pros-list','pro'); }
+  else { p.cons.push(''); renderProsCons(p.cons,'cons-list','con'); }
+}
+
+function removeProCon(type,i) {
+  const p = propData.find(x=>x.id===activePropId);
+  if(type==='pro') { p.pros.splice(i,1); renderProsCons(p.pros,'pros-list','pro'); }
+  else { p.cons.splice(i,1); renderProsCons(p.cons,'cons-list','con'); }
+}
+
+function renderQuizTags(active) {
+  const c = document.getElementById('quiz-tags-wrap');
+  c.innerHTML = allQuizTags.map(t => `
+    <div class="quiz-tag ${active.includes(t.key)?'active':''}" onclick="toggleQuizTag(this,'${t.key}')">
+      ${active.includes(t.key)?'<i class="ti ti-check" style="font-size:9px;" aria-hidden="true"></i>':''}
+      ${t.label}
+    </div>
+  `).join('');
+}
+
+function toggleQuizTag(el, key) {
+  const p = propData.find(x=>x.id===activePropId);
+  const idx = p.quizTags.indexOf(key);
+  if(idx>-1) p.quizTags.splice(idx,1); else p.quizTags.push(key);
+  renderQuizTags(p.quizTags);
+}
+
+function savePropertyChanges() {
+  const p = propData.find(x=>x.id===activePropId);
+  // Update from form fields
+  p.name = document.getElementById('pf-name').value;
+  p.loc = document.getElementById('pf-location').value;
+  p.status = document.getElementById('pf-status').value;
+  p.teaser = document.getElementById('pf-teaser').value;
+  p.overview = document.getElementById('pf-overview').value;
+  p.priceFrom = document.getElementById('pf-price-from').value;
+  p.priceTo = document.getElementById('pf-price-to').value;
+  p.dp = document.getElementById('pf-dp').value;
+  p.resort = document.getElementById('pf-resort').value;
+  // Update badge + title bar
+  const badge = document.getElementById('pe-status-badge');
+  badge.textContent = p.status==='rfo'?'RFO':'Pre-Selling';
+  badge.className = p.status==='rfo'?'sl':'pill pill-blue';
+  document.getElementById('pe-title-bar').textContent = p.name;
+  renderPropList();
+  // Flash save confirmation
+  const btn = event.currentTarget;
+  btn.textContent = '✓ Saved';
+  btn.style.background = 'var(--accent-teal)';
+  btn.style.borderColor = 'var(--accent-teal)';
+  btn.style.color = 'white';
+  setTimeout(()=>{ btn.innerHTML='<i class="ti ti-device-floppy" style="font-size:11px"></i> Save'; btn.style.cssText=''; }, 1800);
+}
+
+function discardChanges() {
+  openPropEditor(activePropId);
+}
+
+// ── CATALOG MANAGER ──────────────────────────────────────────────────────
+let catFilterLoc = 'ALL';
+let catFilterStatus = 'all';
+let catView = 'table';
+
+function setCatFilter(el, loc) {
+  catFilterLoc = loc;
+  document.querySelectorAll('.cat-filter').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderCatalog();
+}
+function setCatStatus(el, s) {
+  catFilterStatus = s;
+  document.querySelectorAll('.cat-status').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderCatalog();
+}
+function setCatalogView(v) {
+  catView = v;
+  document.getElementById('view-table-btn').style.background = v==='table'?'var(--obsidian)':'white';
+  document.getElementById('view-table-btn').style.color      = v==='table'?'var(--accent-gold)':'var(--ash)';
+  document.getElementById('view-card-btn').style.background  = v==='card'?'var(--obsidian)':'white';
+  document.getElementById('view-card-btn').style.color       = v==='card'?'var(--accent-gold)':'var(--ash)';
+  renderCatalog();
+}
+
+function getCatalogFiltered() {
+  const q = (document.getElementById('cat-search')||{value:''}).value.toLowerCase();
+  return propData.filter(p => {
+    const matchQ = !q || p.name.toLowerCase().includes(q) || p.loc.toLowerCase().includes(q) || p.teaser.toLowerCase().includes(q);
+    const matchL = catFilterLoc==='ALL' || p.loc===catFilterLoc;
+    const matchS = catFilterStatus==='all' || p.status===catFilterStatus;
+    return matchQ && matchL && matchS;
+  });
+}
+
+function unitTypeChips(p) {
+  return ['Studio','1 Bedroom','2 Bedroom','3 Bedroom'].map(t => {
+    const u = p.unitTypes.find(x=>x.type===t);
+    const on = u && u.enabled;
+    const short = {Studio:'Studio','1 Bedroom':'1BR','2 Bedroom':'2BR','3 Bedroom':'3BR'}[t];
+    return `<span class="cat-type-chip ${on?'on':''}">${short}</span>`;
+  }).join('');
+}
+
+function renderCatalog() {
+  const filtered = getCatalogFiltered();
+  const body = document.getElementById('cat-body');
+  const statEl = document.getElementById('cat-stat-total');
+  if(statEl) statEl.innerHTML = `<span style="font-weight:600;color:var(--ink-text);font-size:12px;">${filtered.length}</span> ${filtered.length===1?'property':'properties'}`;
+
+  if(!filtered.length) {
+    body.innerHTML = `<div class="cat-empty">
+      <i class="ti ti-search" style="font-size:32px;color:var(--linen);margin-bottom:12px;"></i>
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--ash);margin-bottom:5px;">No developments match your filters.</div>
+      <div style="font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--silver);">Try adjusting your search or location filter</div>
+      <div style="width:80px;height:1px;background:var(--accent-gold);margin:14px auto 0;"></div>
+    </div>`;
+    return;
+  }
+
+  if(catView==='table') {
+    body.innerHTML = `
+    <table class="cat-table">
+      <thead><tr>
+        <th style="padding-left:18px;width:32px;">#</th>
+        <th>Development</th>
+        <th>Location</th>
+        <th>Unit Types</th>
+        <th>Est. Starting</th>
+        <th>Status</th>
+        <th>Visibility</th>
+        <th style="width:150px;"></th>
+      </tr></thead>
+      <tbody>
+        ${filtered.map((p,i) => `
+          <tr>
+            <td style="padding-left:18px;"><span style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;color:var(--linen);">${String(i+1).padStart(2,'0')}</span></td>
+            <td>
+              <div class="cat-dev-name">${p.name}</div>
+              <div class="cat-dev-loc">${p.teaser.split('—')[0].trim()}</div>
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <i class="ti ti-map-pin" style="font-size:11px;color:var(--logo-blue);"></i>
+                <span style="font-size:11px;color:var(--ash);">${p.loc}</span>
+              </div>
+            </td>
+            <td><div class="cat-types">${unitTypeChips(p)}</div></td>
+            <td>
+              <div class="cat-price">₱${p.priceFrom}</div>
+              <div style="font-size:9px;color:var(--silver);">up to ₱${p.priceTo}</div>
+            </td>
+            <td>${p.status==='rfo'?'<span class="sl">RFO</span>':'<span class="pill pill-blue">Pre-Selling</span>'}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="toggleVisibility(this,'${p.id}')">
+                <div class="unit-toggle on" id="vis-toggle-${p.id}" style="width:26px;height:15px;background:var(--logo-blue);"></div>
+                <span id="vis-lbl-${p.id}" style="font-size:9px;color:var(--accent-teal);">Live</span>
+              </div>
+            </td>
+            <td>
+              <div class="row-actions">
+                <button class="row-btn row-btn-edit" onclick="quickEditFromCatalog('${p.id}')"><i class="ti ti-edit" style="font-size:10px;"></i> Edit</button>
+                <button class="row-btn row-btn-wa" onclick="openWA('${p.id}')"><i class="ti ti-brand-whatsapp" style="font-size:10px;"></i></button>
+                <button class="row-btn row-btn-vis" onclick="previewProp('${p.id}')"><i class="ti ti-external-link" style="font-size:10px;"></i></button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div style="margin:20px 18px;padding:20px 24px;background:var(--obsidian);border:1px solid var(--accent-gold);border-radius:2px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <div>
+        <div style="font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent-gold);opacity:0.7;margin-bottom:5px;">Prestige Sourcing</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--white);line-height:1.3;">Don't see what you're looking for?<br>Jerwin can source off-market DMCI units.</div>
+      </div>
+      <button class="btn-primary" style="flex-shrink:0;font-size:9px;" onclick="openWA('custom')">
+        <i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Contact Jerwin
+      </button>
+    </div>`;
+  } else {
+    body.innerHTML = `<div class="cat-cards-grid">
+      ${filtered.map((p,i) => `
+        <div class="cat-card" onclick="quickEditFromCatalog('${p.id}')">
+          <div class="cat-card-thumb">
+            <div class="cat-card-thumb-overlay"></div>
+            <div class="cat-card-idx">${String(i+1).padStart(2,'0')}</div>
+            <div style="position:absolute;top:8px;right:8px;">${p.status==='rfo'?'<span class="sl" style="font-size:7.5px;">RFO</span>':'<span class="pill pill-blue" style="font-size:7.5px;">Pre</span>'}</div>
+            <div style="position:absolute;top:10px;left:10px;width:7px;height:7px;border-radius:50%;background:var(--accent-teal);" title="Live"></div>
+          </div>
+          <div class="cat-card-body">
+            <div class="cat-card-name">${p.name}</div>
+            <div class="cat-card-loc"><i class="ti ti-map-pin" style="font-size:9px;"></i> ${p.loc}</div>
+            <div class="cat-card-price">From ₱${p.priceFrom}</div>
+            <div class="cat-card-meta">
+              <div class="cat-types">${unitTypeChips(p)}</div>
+              <span style="font-size:9px;color:var(--silver);">★ ${p.resort}</span>
+            </div>
+            <div class="cat-card-actions" onclick="event.stopPropagation()">
+              <button class="row-btn row-btn-edit" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;" onclick="quickEditFromCatalog('${p.id}')"><i class="ti ti-edit" style="font-size:10px;"></i> Edit</button>
+              <button class="row-btn row-btn-wa" onclick="openWA('${p.id}')"><i class="ti ti-brand-whatsapp" style="font-size:10px;"></i></button>
+              <button class="row-btn row-btn-vis" onclick="previewProp('${p.id}')"><i class="ti ti-external-link" style="font-size:10px;"></i></button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+      <div style="border:1.5px dashed var(--linen);border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:200px;cursor:pointer;transition:border-color 180px;" onmouseover="this.style.borderColor='var(--logo-blue)'" onmouseout="this.style.borderColor='var(--linen)'">
+        <i class="ti ti-plus" style="font-size:22px;color:var(--linen);"></i>
+        <span style="font-size:10px;color:var(--silver);">Add property</span>
+      </div>
+    </div>`;
+  }
+}
+
+function toggleVisibility(el, id) {
+  const tog = document.getElementById('vis-toggle-'+id);
+  const lbl = document.getElementById('vis-lbl-'+id);
+  if(!tog||!lbl) return;
+  const isOn = tog.classList.contains('on');
+  tog.classList.toggle('on', !isOn);
+  tog.style.background = !isOn ? 'var(--logo-blue)' : 'var(--linen)';
+  lbl.textContent = !isOn ? 'Live' : 'Hidden';
+  lbl.style.color = !isOn ? 'var(--accent-teal)' : 'var(--silver)';
+}
+
+function quickEditFromCatalog(id) {
+  const navItem = [...document.querySelectorAll('.s-item')].find(el=>el.textContent.includes('Property Details'));
+  if(navItem) switchSection(navItem,'propdetails');
+  openPropEditor(id);
+}
+
+function openWA(id) {
+  const p = propData.find(x=>x.id===id);
+  const msg = p
+    ? `Hi Jerwin, I'm interested in ${p.name} in ${p.loc}. Please send available units and pricing.`
+    : `Hi Jerwin, I'm looking for something specific. Can you help?`;
+  window.open('https://wa.me/639170000000?text='+encodeURIComponent(msg),'_blank');
+}
+
+function previewProp(id) {
+  alert('Preview: #/property-detail/'+id);
+}
+
+// ── WEBSITE SETTINGS ─────────────────────────────────────────────────────
+const SETTINGS_TABS = ['general','seo','contact','nav','footer','maint'];
+
+function setSettingsTab(tab) {
+  SETTINGS_TABS.forEach(t => {
+    const body = document.getElementById('st-'+t);
+    const btn  = document.getElementById('stab-'+t);
+    if(body) body.style.display = t===tab ? 'flex' : 'none';
+    if(btn)  btn.classList.toggle('active', t===tab);
+  });
+}
+
+function flashSave(btn) {
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-circle-check" style="font-size:11px"></i> Saved';
+  btn.style.background = 'var(--accent-teal)';
+  btn.style.borderColor = 'var(--accent-teal)';
+  btn.style.color = 'white';
+  setTimeout(() => {
+    btn.innerHTML = orig;
+    btn.style.cssText = '';
+  }, 1800);
+}
+
+function updateSeoCount(inputId, countId, max) {
+  const input = document.getElementById(inputId);
+  const counter = document.getElementById(countId);
+  if(!input||!counter) return;
+  const len = input.value.length;
+  counter.textContent = len + ' / ' + max;
+  counter.style.color = len > max ? '#E05252' : 'var(--silver)';
+}
+
+let maintOn = false;
+function toggleMaint() {
+  maintOn = !maintOn;
+  const tog  = document.getElementById('maint-toggle');
+  const lbl  = document.getElementById('maint-status-lbl');
+  const warn = document.getElementById('maint-warning');
+  const card = document.getElementById('maint-card');
+  tog.classList.toggle('on', maintOn);
+  tog.style.background = maintOn ? '#D4A017' : 'var(--linen)';
+  lbl.textContent = maintOn ? 'On' : 'Off';
+  lbl.style.color = maintOn ? 'var(--accent-gold)' : 'var(--silver)';
+  if(warn) warn.style.display = maintOn ? 'flex' : 'none';
+  if(card) card.style.borderColor = maintOn ? 'rgba(212,160,23,0.5)' : 'var(--linen)';
+}
+
+function toggleSocial(platform) {
+  const tog = document.getElementById('sct-'+platform);
+  const lbl = document.getElementById('scl-'+platform);
+  if(!tog||!lbl) return;
+  const isOn = tog.classList.contains('on');
+  tog.classList.toggle('on', !isOn);
+  tog.style.background = !isOn ? 'var(--logo-blue)' : 'var(--linen)';
+  lbl.textContent = !isOn ? 'Live' : 'Off';
+  lbl.style.color = !isOn ? 'var(--accent-teal)' : 'var(--silver)';
+}
+
+function saveSocials() {
+  const msg = document.getElementById('socials-saved-msg');
+  if(!msg) return;
+  msg.style.display = 'flex';
+  setTimeout(()=>{ msg.style.display='none'; }, 3500);
+}
+
+renderTree();
+</script>
